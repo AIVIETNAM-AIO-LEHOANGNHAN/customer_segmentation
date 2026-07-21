@@ -9,7 +9,7 @@ Trong lĩnh vực bán lẻ và thương mại điện tử, doanh nghiệp liê
 
 Phân khúc khách hàng (Customer Segmentation) là một trong những bài toán quan trọng của khoa học dữ liệu, giúp doanh nghiệp chia khách hàng thành các nhóm có hành vi tương đồng để xây dựng các chiến lược marketing, chăm sóc khách hàng và tối ưu doanh thu.
 
-Trong dự án này, nhóm sử dụng mô hình **RFM (Recency – Frequency – Monetary)** để biểu diễn hành vi mua sắm của khách hàng và tiến hành so sánh ba thuật toán phân cụm phổ biến:
+Chính vì vậy, trong dự án này, nhóm sử dụng mô hình **RFM (Recency – Frequency – Monetary)** để biểu diễn hành vi mua sắm của khách hàng và tiến hành so sánh ba thuật toán phân cụm phổ biến:
 
 - K-Means
 - Gaussian Mixture Model (GMM)
