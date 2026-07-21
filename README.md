@@ -127,7 +127,7 @@ Dự án được triển khai theo **bốn Epic**, bám sát đúng luồng x�
 **Mục tiêu:** Chuẩn hóa dữ liệu giao dịch và đảm bảo chất lượng dữ liệu trước khi xây dựng đặc trưng RFM.
 
 | Task | Vai trò |
-|---|---|---|
+|---|---|
 | Định nghĩa chuẩn schema dữ liệu đầu vào & viết tài liệu định dạng file | Leader | 
 | Khám phá dữ liệu và xây dựng module làm sạch dữ liệu | Data | 
 | Xây UI upload file & ánh xạ cột linh hoạt | Pipeline | 
@@ -141,7 +141,7 @@ RFM là "ngôn ngữ chung" mà cả 3 thuật toán đều dùng làm input. Đ
 **Mục tiêu:** Chuyển dữ liệu giao dịch thành bộ đặc trưng RFM phục vụ cho các thuật toán phân cụm.
 
 | Task | Vai trò |
-|---|---|---|
+|---|---|
 | Định nghĩa công thức RFM chuẩn & mốc thời gian snapshot | Leader | 
 | Viết hàm tính Recency, Frequency, Monetary | Data |
 | Xử lý Outlier & chuẩn hóa dữ liệu (log-transform, scaling) | Model | 
@@ -154,7 +154,7 @@ RFM là "ngôn ngữ chung" mà cả 3 thuật toán đều dùng làm input. Đ
 **Mục tiêu:** Triển khai, tinh chỉnh và đánh giá ba thuật toán phân cụm trên cùng tập dữ liệu RFM.
 
 | Task | Vai trò |
-|---|---|---|
+|---|---|
 | Thiết lập quy trình đánh giá và tiêu chí so sánh mô hình | Leader |
 | Chuẩn bị & kiểm tra lại tập dữ liệu train cho từng thuật toán | Data | 
 | Triển khai K-Means, Gaussian Mixture Model, HDBSCAN với tham số điều chỉnh được qua UI | Model |
@@ -168,7 +168,7 @@ Kết quả phân cụm chỉ có giá trị khi người dùng không chuyên h
 **Mục tiêu:** Phân tích kết quả phân cụm, trực quan hóa dữ liệu và hoàn thiện sản phẩm.
 
 | Task | Vai trò | 
-|---|---|---|
+|---|---|
 | Tổng hợp báo cáo so sánh 3 thuật toán & đưa khuyến nghị cuối cùng | Leader | 
 | Đặt tên & mô tả nghiệp vụ cho từng cụm dựa trên RFM trung bình | Data | 
 | Viết bảng so sánh định lượng 3 thuật toán kèm giải thích khi nào nên dùng cái nào | Model |
