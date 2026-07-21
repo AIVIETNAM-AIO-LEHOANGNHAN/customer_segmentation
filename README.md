@@ -1,5 +1,5 @@
 # 🛍️ CUSTOMER SEGMENTATION USING RFM
-## Tên dự án : **So sánh các thuật toán phân cụm trong bài toán Phân khúc Khách hàng**
+## Tên dự án : **So sánh hiệu năng các thuật toán phân cụm trong bài toán Phân khúc Khách hàng**
 
 ---
 
