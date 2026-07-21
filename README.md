@@ -1,9 +1,9 @@
-# 🛍️ Customer Segmentation using RFM
-## So sánh các thuật toán phân cụm trong bài toán Phân khúc Khách hàng
+# 🛍️ CUSTOMER SEGMENTATION USING RFM
+## Tên dự án : **So sánh các thuật toán phân cụm trong bài toán Phân khúc Khách hàng**
 
 ---
 
-## Giới thiệu
+## Dẫn nhập
 
 Trong lĩnh vực bán lẻ và thương mại điện tử, doanh nghiệp liên tục thu thập lượng lớn dữ liệu giao dịch từ khách hàng. Tuy nhiên, không phải tất cả khách hàng đều có hành vi mua sắm giống nhau. Việc áp dụng cùng một chiến lược marketing cho toàn bộ khách hàng thường làm giảm hiệu quả kinh doanh và gây lãng phí nguồn lực.
 
@@ -21,7 +21,7 @@ Dự án được xây dựng dưới dạng một **Web Application**, cho phé
 
 ## Mục lục
 
-- [Giới thiệu](#giới-thiệu)
+- [Dẫn nhập](#dẫn-nhâp)
 - [Giới thiệu dự án](#giới-thiệu-dự-án)
 - [Mục tiêu dự án](#mục-tiêu-dự-án)
 - [Bộ dữ liệu](#bộ-dữ-liệu)
