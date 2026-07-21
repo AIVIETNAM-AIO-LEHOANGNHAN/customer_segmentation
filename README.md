@@ -120,7 +120,7 @@ Xây dựng hệ thống phân khúc khách hàng dựa trên mô hình RFM và 
 
 Dự án được triển khai theo **bốn Epic**, bám sát đúng luồng xử lý của ứng dụng Streamlit: **Upload → Làm sạch → RFM → Phân cụm & đánh giá → Trực quan hóa & bàn giao**. Mỗi Epic có 5 task, mỗi task gán đúng 1 vai trò phụ trách — đảm bảo khối lượng công việc đồng đều giữa 5 thành viên trong suốt cả 4 Epic.
 
-### Epic 1 — Tiếp nhận & Chuẩn hóa dữ liệu đầu vào
+### Epic 1 — Khám phá, Làm sạch & Chuẩn hóa dữ liệu
 
 **Vì sao cần Epic này:** Đây là nền móng của toàn bộ pipeline. Mọi bước sau (RFM, phân cụm, kết quả) đều phụ thuộc vào dữ liệu sạch — sai ngay từ đầu sẽ lan lỗi xuống toàn hệ thống ("garbage in, garbage out"), nên cần tách thành Epic riêng và xử lý kỹ ngay từ đầu.
 
@@ -144,7 +144,7 @@ Dự án được triển khai theo **bốn Epic**, bám sát đúng luồng x�
 | Xây giao diện hiển thị bảng RFM & biểu đồ phân phối | Pipeline | Người dùng cần "nhìn thấy" dữ liệu trung gian trước khi phân cụm để tin tưởng kết quả cuối |
 | Kiểm thử công thức RFM trên tập dữ liệu mẫu có đáp án biết trước | QA/QC | Sai ở bước này sẽ kéo theo sai toàn bộ kết quả phân cụm — cần chốt đúng trước khi đi tiếp |
 
-### Epic 3 — Phân cụm & Đánh giá mô hình
+### Epic 3 — Huấn luyện & Đánh giá mô hình
 
 **Vì sao cần Epic này:** Đây là lõi kỹ thuật, trả lời trực tiếp câu hỏi nghiên cứu của nhóm. Phức tạp nhất, cần nhiều vòng thử nghiệm và chuyên môn ML sâu, nên tách riêng để tập trung nguồn lực.
 
@@ -156,7 +156,7 @@ Dự án được triển khai theo **bốn Epic**, bám sát đúng luồng x�
 | Xây state management (đổi tham số → chạy lại không load lại toàn app) | Pipeline | Trải nghiệm tương tác mượt là yêu cầu cốt lõi của một web app — không để người dùng chờ load lại mỗi lần đổi tham số |
 | Viết & kiểm tra chỉ số đánh giá (Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index) | QA/QC | Đây là "trọng tài" khách quan để so sánh 3 thuật toán — phải đảm bảo tính đúng của chỉ số trước khi dùng để kết luận |
 
-### Epic 4 — Phân tích, Trực quan hóa & Bàn giao
+### Epic 4 — Phân tích & Trực quan hóa
 
 **Vì sao cần Epic này:** Kết quả phân cụm chỉ có giá trị khi người dùng không chuyên hiểu và dùng được. Epic này biến số liệu kỹ thuật thành thông tin dễ hiểu và đóng gói sản phẩm để bàn giao — thiếu Epic này thì 3 Epic trước chỉ là "đồ chơi nội bộ", không ai dùng được.
 
