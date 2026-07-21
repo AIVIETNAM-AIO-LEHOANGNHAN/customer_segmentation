@@ -122,51 +122,58 @@ Dự án được triển khai theo **bốn Epic**, bám sát đúng luồng x�
 
 ### Epic 1 — Khám phá, Làm sạch & Chuẩn hóa dữ liệu
 
-**Vì sao cần Epic này:** Đây là nền móng của toàn bộ pipeline. Mọi bước sau (RFM, phân cụm, kết quả) đều phụ thuộc vào dữ liệu sạch — sai ngay từ đầu sẽ lan lỗi xuống toàn hệ thống ("garbage in, garbage out"), nên cần tách thành Epic riêng và xử lý kỹ ngay từ đầu.
+Đây là nền móng của toàn bộ pipeline. Mọi bước sau (RFM, phân cụm, kết quả) đều phụ thuộc vào dữ liệu sạch — sai ngay từ đầu sẽ lan lỗi xuống toàn hệ thống ("garbage in, garbage out"), nên cần tách thành Epic riêng và xử lý kỹ ngay từ đầu.
 
-| Task | Vai trò | Lý do |
+**Mục tiêu:** Chuẩn hóa dữ liệu giao dịch và đảm bảo chất lượng dữ liệu trước khi xây dựng đặc trưng RFM.
+
+| Task | Vai trò |
 |---|---|---|
-| Định nghĩa chuẩn schema dữ liệu đầu vào & viết tài liệu định dạng file | Leader | Thống nhất "hợp đồng dữ liệu" trước khi các role khác bắt tay code, tránh mỗi người hiểu định dạng một kiểu |
-| Viết hàm làm sạch dữ liệu (loại thiếu / trùng / đơn hủy) | Data | Xử lý dữ liệu thô cốt lõi, quyết định trực tiếp chất lượng RFM tính ở Epic sau |
-| Xây UI upload file & ánh xạ cột linh hoạt | Pipeline | Người dùng thật có định dạng file khác nhau, cần giao diện để họ tự chọn cột thay vì hard-code tên cột |
-| Phân tích thống kê sơ bộ dữ liệu sạch (phân phối, outlier) | Model | K-Means và GMM rất nhạy với outlier — cần biết đặc điểm dữ liệu trước để chuẩn bị xử lý ở Epic sau |
-| Viết test case & hiển thị cảnh báo lỗi khi dữ liệu không hợp lệ | QA/QC | Upload là nơi dễ phát sinh lỗi nhất — cần chặn lỗi sớm trước khi lan xuống pipeline |
+| Định nghĩa chuẩn schema dữ liệu đầu vào & viết tài liệu định dạng file | Leader | 
+| Khám phá dữ liệu và xây dựng module làm sạch dữ liệu | Data | 
+| Xây UI upload file & ánh xạ cột linh hoạt | Pipeline | 
+| Phân tích thống kê sơ bộ dữ liệu sạch (phân phối, outlier) | Model |
+| Kiểm thử dữ liệu đầu vào và báo cáo chất lượng dữ liệu| QA/QC | 
 
 ### Epic 2 — Biểu diễn đặc trưng RFM
 
-**Vì sao cần Epic này:** RFM là "ngôn ngữ chung" mà cả 3 thuật toán đều dùng làm input. Đây là bước feature engineering có logic nghiệp vụ riêng — sai công thức ở đây thì dù thuật toán tốt đến đâu, kết quả cũng vô nghĩa. Cần tách Epic riêng để kiểm soát chặt.
+RFM là "ngôn ngữ chung" mà cả 3 thuật toán đều dùng làm input. Đây là bước feature engineering có logic nghiệp vụ riêng — sai công thức ở đây thì dù thuật toán tốt đến đâu, kết quả cũng vô nghĩa. Cần tách Epic riêng để kiểm soát chặt.
 
-| Task | Vai trò | Lý do |
+**Mục tiêu:** Chuyển dữ liệu giao dịch thành bộ đặc trưng RFM phục vụ cho các thuật toán phân cụm.
+
+| Task | Vai trò |
 |---|---|---|
-| Định nghĩa công thức RFM chuẩn & mốc thời gian snapshot | Leader | Recency phụ thuộc vào "ngày tham chiếu" — cần thống nhất cách tính để không lệch kết quả giữa các lần chạy |
-| Viết hàm tính Recency, Frequency, Monetary | Data | Logic tính toán lõi, biến giao dịch thô thành 3 đặc trưng dùng cho mô hình |
-| Xử lý Outlier & chuẩn hóa dữ liệu (log-transform, scaling) | Model | Thuật toán dựa trên khoảng cách rất nhạy thang đo — bước này quyết định chất lượng cụm về sau |
-| Xây giao diện hiển thị bảng RFM & biểu đồ phân phối | Pipeline | Người dùng cần "nhìn thấy" dữ liệu trung gian trước khi phân cụm để tin tưởng kết quả cuối |
-| Kiểm thử công thức RFM trên tập dữ liệu mẫu có đáp án biết trước | QA/QC | Sai ở bước này sẽ kéo theo sai toàn bộ kết quả phân cụm — cần chốt đúng trước khi đi tiếp |
+| Định nghĩa công thức RFM chuẩn & mốc thời gian snapshot | Leader | 
+| Viết hàm tính Recency, Frequency, Monetary | Data |
+| Xử lý Outlier & chuẩn hóa dữ liệu (log-transform, scaling) | Model | 
+| Xây giao diện hiển thị bảng RFM & biểu đồ phân phối | Pipeline | 
+| Kiểm thử công thức RFM trên tập dữ liệu mẫu có đáp án biết trước | QA/QC |
 
 ### Epic 3 — Huấn luyện & Đánh giá mô hình
+Đây là lõi kỹ thuật, trả lời trực tiếp câu hỏi nghiên cứu của nhóm. Phức tạp nhất, cần nhiều vòng thử nghiệm và chuyên môn ML sâu, nên tách riêng để tập trung nguồn lực.
 
-**Vì sao cần Epic này:** Đây là lõi kỹ thuật, trả lời trực tiếp câu hỏi nghiên cứu của nhóm. Phức tạp nhất, cần nhiều vòng thử nghiệm và chuyên môn ML sâu, nên tách riêng để tập trung nguồn lực.
+**Mục tiêu:** Triển khai, tinh chỉnh và đánh giá ba thuật toán phân cụm trên cùng tập dữ liệu RFM.
 
-| Task | Vai trò | Lý do |
+| Task | Vai trò |
 |---|---|---|
-| Định nghĩa tiêu chí "một lần chạy hợp lệ" & điều phối thử nghiệm 3 thuật toán | Leader | 3 thuật toán chạy song song — cần khung thống nhất để so sánh công bằng, tránh mỗi thuật toán một chuẩn |
-| Chuẩn bị & kiểm tra lại tập dữ liệu train cho từng thuật toán | Data | Input sai (NaN sau scaling, rò rỉ dữ liệu) khiến model chạy được nhưng cho kết quả vô nghĩa |
-| Triển khai K-Means, Gaussian Mixture Model, HDBSCAN với tham số điều chỉnh được qua UI | Model | Nhiệm vụ kỹ thuật trung tâm — trực tiếp trả lời câu hỏi nghiên cứu "thuật toán nào cân bằng tốt nhất" |
-| Xây state management (đổi tham số → chạy lại không load lại toàn app) | Pipeline | Trải nghiệm tương tác mượt là yêu cầu cốt lõi của một web app — không để người dùng chờ load lại mỗi lần đổi tham số |
-| Viết & kiểm tra chỉ số đánh giá (Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index) | QA/QC | Đây là "trọng tài" khách quan để so sánh 3 thuật toán — phải đảm bảo tính đúng của chỉ số trước khi dùng để kết luận |
+| Thiết lập quy trình đánh giá và tiêu chí so sánh mô hình | Leader |
+| Chuẩn bị & kiểm tra lại tập dữ liệu train cho từng thuật toán | Data | 
+| Triển khai K-Means, Gaussian Mixture Model, HDBSCAN với tham số điều chỉnh được qua UI | Model |
+| Xây dựng cơ chế chạy mô hình tương tác trên giao diện | Pipeline | 
+| Kiểm thử chỉ số đánh giá (Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index) | QA/QC |
 
 ### Epic 4 — Phân tích & Trực quan hóa
 
-**Vì sao cần Epic này:** Kết quả phân cụm chỉ có giá trị khi người dùng không chuyên hiểu và dùng được. Epic này biến số liệu kỹ thuật thành thông tin dễ hiểu và đóng gói sản phẩm để bàn giao — thiếu Epic này thì 3 Epic trước chỉ là "đồ chơi nội bộ", không ai dùng được.
+Kết quả phân cụm chỉ có giá trị khi người dùng không chuyên hiểu và dùng được. Epic này biến số liệu kỹ thuật thành thông tin dễ hiểu và đóng gói sản phẩm để bàn giao — thiếu Epic này thì 3 Epic trước chỉ là "đồ chơi nội bộ", không ai dùng được.
 
-| Task | Vai trò | Lý do |
+**Mục tiêu:** Phân tích kết quả phân cụm, trực quan hóa dữ liệu và hoàn thiện sản phẩm.
+
+| Task | Vai trò | 
 |---|---|---|
-| Tổng hợp báo cáo so sánh 3 thuật toán & đưa khuyến nghị cuối cùng | Leader | Cần một người chịu trách nhiệm kết luận cuối cùng, thay vì để kết quả rời rạc, mỗi người hiểu một kiểu |
-| Đặt tên & mô tả nghiệp vụ cho từng cụm dựa trên RFM trung bình | Data | Con số cụm 0, 1, 2 vô nghĩa với người không chuyên — cần "dịch" sang ngôn ngữ kinh doanh (VD: "khách VIP", "khách sắp rời bỏ") |
-| Viết bảng so sánh định lượng 3 thuật toán kèm giải thích khi nào nên dùng cái nào | Model | Câu trả lời trực tiếp cho câu hỏi nghiên cứu — cần người hiểu sâu thuật toán để diễn giải đúng, tránh đọc sai chỉ số |
-| Xây Dashboard (biểu đồ PCA 2D, bảng cluster profile) & chức năng xuất CSV | Pipeline | Đây là "bộ mặt" của sản phẩm — quyết định trải nghiệm và mức độ tin cậy của người dùng cuối |
-| Kiểm thử toàn hệ thống từ upload đến xuất kết quả (UAT), thu thập phản hồi | QA/QC | Lần kiểm tra cuối cùng trước khi sản phẩm đến tay người dùng thật — phát hiện lỗi mà các Epic riêng lẻ không thấy được |
+| Tổng hợp báo cáo so sánh 3 thuật toán & đưa khuyến nghị cuối cùng | Leader | 
+| Đặt tên & mô tả nghiệp vụ cho từng cụm dựa trên RFM trung bình | Data | 
+| Viết bảng so sánh định lượng 3 thuật toán kèm giải thích khi nào nên dùng cái nào | Model |
+| Xây Dashboard (biểu đồ PCA 2D, bảng cluster profile) & chức năng xuất CSV | Pipeline | 
+| Kiểm thử toàn hệ thống từ upload đến xuất kết quả (UAT), thu thập phản hồi | QA/QC |
 
 ---
 
@@ -175,9 +182,9 @@ Dự án được triển khai theo **bốn Epic**, bám sát đúng luồng x�
 | Vai trò | Trách nhiệm |
 |----------|-------------|
 | **Leader** | Quản lý dự án, thiết kế pipeline, tổng hợp báo cáo, điều phối tiến độ |
-| **Data** | Data Profiling, làm sạch dữ liệu, xây dựng đặc trưng RFM |
-| **Model** | Triển khai K-Means, GMM, HDBSCAN và đánh giá mô hình |
-| **Pipeline** | Xây dựng Web App, giao diện người dùng, dashboard, export dữ liệu |
+| **AIE Data** | Data Profiling, làm sạch dữ liệu, xây dựng đặc trưng RFM |
+| **AIE Model** | Triển khai K-Means, GMM, HDBSCAN và đánh giá mô hình |
+| **AIE Pipeline** | Xây dựng Web App, giao diện người dùng, dashboard, export dữ liệu |
 | **QA/QC** | Kiểm thử dữ liệu, kiểm thử hệ thống và đảm bảo chất lượng |
 
 ---
@@ -219,6 +226,9 @@ Mỗi vai trò đảm nhận đúng 1 task trong mỗi Epic — đảm bảo kh�
 ### Version Control
 - Git
 - GitHub
+
+### Quản lý tiến độ dự án
+- Jira Kanban
 
 ---
 
@@ -288,11 +298,6 @@ hotfix/<bug-name>
 ```
 feat:
 fix:
-docs:
-style:
-refactor:
-test:
-chore:
 ```
 
 Ví dụ:
@@ -301,10 +306,6 @@ Ví dụ:
 feat: implement K-Means clustering
 
 fix: handle missing CustomerID
-
-docs: update README
-
-refactor: optimize RFM pipeline
 ```
 
 ---
@@ -314,13 +315,9 @@ refactor: optimize RFM pipeline
 Sau khi hoàn thành, dự án cung cấp:
 
 - Web Application phân khúc khách hàng.
-- Pipeline xử lý dữ liệu hoàn chỉnh.
-- Module xây dựng đặc trưng RFM.
-- Công cụ so sánh K-Means, GMM và HDBSCAN.
-- Dashboard trực quan.
-- Báo cáo phân tích.
-- File CSV kết quả phân cụm.
+- Technical Report
 - Mã nguồn mở trên GitHub.
+- Video presentation
 
 ---
 
@@ -332,17 +329,3 @@ Sau khi hoàn thành, dự án cung cấp:
 - Xây dựng hệ thống có khả năng tái sử dụng trên các bộ dữ liệu giao dịch khác.
 
 ---
-
-## Nhóm phát triển
-
-**Project:** Customer Segmentation using RFM
-
-**Dataset:** Online Retail II
-
-**Algorithms:** K-Means • Gaussian Mixture Model • HDBSCAN
-
-**Language:** Python
-
-**Framework:** Streamlit
-
-**License:** MIT
