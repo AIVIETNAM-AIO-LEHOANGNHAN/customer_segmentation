@@ -2,8 +2,6 @@
 # 🛍️ Customer Segmentation using RFM
 ## Tên dự án : So sánh hiệu năng các thuật toán phân cụm trong bài toán Phân khúc Khách hàng
 
----
-
 # Giới thiệu
 
 Trong lĩnh vực bán lẻ và thương mại điện tử, doanh nghiệp liên tục thu thập lượng lớn dữ liệu giao dịch từ khách hàng. Tuy nhiên, không phải tất cả khách hàng đều có hành vi mua sắm giống nhau. Việc áp dụng cùng một chiến lược marketing cho toàn bộ khách hàng thường làm giảm hiệu quả kinh doanh và gây lãng phí nguồn lực.
@@ -17,23 +15,6 @@ Trong dự án này, nhóm sử dụng mô hình **RFM (Recency – Frequency �
 - HDBSCAN
 
 Dự án được xây dựng dưới dạng một **Web Application**, cho phép người dùng tải dữ liệu, thực hiện tiền xử lý, phân cụm, trực quan hóa kết quả và xuất báo cáo một cách trực quan.
-
----
-
-# Mục lục
-
-- [Giới thiệu](#giới-thiệu)
-- [Giới thiệu dự án](#giới-thiệu-dự-án)
-- [Mục tiêu dự án](#mục-tiêu-dự-án)
-- [Bộ dữ liệu](#bộ-dữ-liệu)
-- [Pipeline dự án](#pipeline-dự-án)
-- [Vai trò thành viên](#vai-trò-thành-viên)
-- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
-- [Cấu trúc mã nguồn](#cấu-trúc-mã-nguồn)
-- [Cơ chế cộng tác](#cơ-chế-cộng-tác)
-- [Sản phẩm đầu ra](#sản-phẩm-đầu-ra)
-
----
 
 # Giới thiệu dự án
 
@@ -58,8 +39,6 @@ Khác với các dự án chỉ sử dụng một thuật toán phân cụm, h�
 
 Nhờ đó, người dùng có thể đánh giá ưu điểm và hạn chế của từng thuật toán trên cùng một tập dữ liệu.
 
----
-
 # Mục tiêu dự án
 
 ## Mục tiêu tổng quát
@@ -78,8 +57,6 @@ Xây dựng hệ thống phân khúc khách hàng dựa trên mô hình RFM và 
 - Phân tích ưu điểm và hạn chế của từng thuật toán.
 - Trực quan hóa kết quả phân cụm.
 - Xây dựng Web App hỗ trợ phân tích tương tác.
-
----
 
 # Bộ dữ liệu
 
@@ -115,8 +92,6 @@ Xây dựng hệ thống phân khúc khách hàng dựa trên mô hình RFM và 
 - Đủ lớn để đánh giá các thuật toán phân cụm.
 - Có thể xây dựng đặc trưng RFM.
 - Được sử dụng rộng rãi trong nghiên cứu Customer Segmentation.
-
----
 
 # Pipeline dự án
 
@@ -154,7 +129,7 @@ Triển khai:
 - Davies-Bouldin Index
 - Calinski-Harabasz Index
 
-## Epic 4 — Phân tích, Trực quan hóa & Bàn giao
+## Epic 4 — Phân tích & Trực quan hóa
 
 - Phân tích kết quả.
 - So sánh các thuật toán.
@@ -163,19 +138,15 @@ Triển khai:
 - Xuất CSV.
 - Kiểm thử toàn hệ thống.
 
----
-
 # Vai trò thành viên
 
 | Vai trò | Trách nhiệm |
 |----------|-------------|
 | **Leader** | Quản lý dự án, thiết kế pipeline, tổng hợp báo cáo, điều phối tiến độ |
-| **Data** | Data Profiling, làm sạch dữ liệu, xây dựng đặc trưng RFM |
-| **Model** | Triển khai K-Means, GMM, HDBSCAN và đánh giá mô hình |
-| **Pipeline** | Xây dựng Web App, giao diện người dùng, dashboard, export dữ liệu |
+| **AIE Data** | Data Profiling, làm sạch dữ liệu, xây dựng đặc trưng RFM |
+| **AIE Model** | Triển khai K-Means, GMM, HDBSCAN và đánh giá mô hình |
+| **AIE Pipeline** | Xây dựng Web App, giao diện người dùng, dashboard, export dữ liệu |
 | **QA/QC** | Kiểm thử dữ liệu, kiểm thử hệ thống và đảm bảo chất lượng |
-
----
 
 # Công nghệ sử dụng
 
@@ -206,8 +177,6 @@ Triển khai:
 
 - Git
 - GitHub
-
----
 
 # Cấu trúc mã nguồn
 
@@ -243,8 +212,6 @@ Customer-Segmentation/
 └── .gitignore
 ```
 
----
-
 # Cơ chế cộng tác
 
 Nhóm sử dụng GitHub để quản lý mã nguồn theo mô hình Git Workflow.
@@ -276,25 +243,8 @@ hotfix/<bug-name>
 feat:
 fix:
 docs:
-style:
-refactor:
 test:
-chore:
 ```
-
-Ví dụ
-
-```
-feat: implement K-Means clustering
-
-fix: handle missing CustomerID
-
-docs: update README
-
-refactor: optimize RFM pipeline
-```
-
----
 
 # Sản phẩm đầu ra
 
@@ -309,28 +259,9 @@ Sau khi hoàn thành, dự án cung cấp:
 - File CSV kết quả phân cụm.
 - Mã nguồn mở trên GitHub.
 
----
-
 # Kết quả mong đợi
 
 - Hiểu rõ hành vi khách hàng thông qua RFM.
 - So sánh toàn diện ba thuật toán phân cụm.
 - Hỗ trợ lựa chọn thuật toán phù hợp cho từng bài toán Customer Segmentation.
 - Xây dựng hệ thống có khả năng tái sử dụng trên các bộ dữ liệu giao dịch khác.
-
----
-
-## Nhóm phát triển
-
-**Project:** Customer Segmentation using RFM
-
-**Dataset:** Online Retail II
-
-**Algorithms:** K-Means • Gaussian Mixture Model • HDBSCAN
-
-**Language:** Python
-
-**Framework:** Streamlit
-
-**License:** MIT
-````
