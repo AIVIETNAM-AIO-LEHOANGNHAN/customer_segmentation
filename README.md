@@ -293,22 +293,6 @@ main
 develop
 feature/<feature-name>
 bugfix/<bug-name>
-hotfix/<bug-name>
-```
-
-### Quy ước Commit
-
-```
-feat:
-fix:
-```
-
-Ví dụ:
-
-```
-feat: implement K-Means clustering
-
-fix: handle missing CustomerID
 ```
 
 ---
