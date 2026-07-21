@@ -118,6 +118,9 @@ Xây dựng hệ thống phân khúc khách hàng dựa trên mô hình RFM và 
 
 ## Pipeline dự án
 
+<img width="1372" height="758" alt="image" src="https://github.com/user-attachments/assets/ae673ee6-4025-435a-92a1-133077b158b4" />
+
+
 Dự án được triển khai theo **bốn Epic**, bám sát đúng luồng xử lý của ứng dụng Streamlit: **Upload → Làm sạch → RFM → Phân cụm & đánh giá → Trực quan hóa & bàn giao**. Mỗi Epic có 5 task, mỗi task gán đúng 1 vai trò phụ trách — đảm bảo khối lượng công việc đồng đều giữa 5 thành viên trong suốt cả 4 Epic.
 
 ### Epic 1 — Khám phá, Làm sạch & Chuẩn hóa dữ liệu
@@ -161,7 +164,7 @@ RFM là "ngôn ngữ chung" mà cả 3 thuật toán đều dùng làm input. Đ
 | Xây dựng cơ chế chạy mô hình tương tác trên giao diện | Pipeline | 
 | Kiểm thử chỉ số đánh giá (Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index) | QA/QC |
 
-### Epic 4 — Phân tích & Trực quan hóa
+### Epic 4 — Phân tích, Trực quan hóa & Tổng hợp kết quả
 
 Kết quả phân cụm chỉ có giá trị khi người dùng không chuyên hiểu và dùng được. Epic này biến số liệu kỹ thuật thành thông tin dễ hiểu và đóng gói sản phẩm để bàn giao — thiếu Epic này thì 3 Epic trước chỉ là "đồ chơi nội bộ", không ai dùng được.
 
