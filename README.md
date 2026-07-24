@@ -1,5 +1,5 @@
 # 🛍️ CUSTOMER SEGMENTATION USING RFM
-## Tên dự án : **So sánh các thuật toán phân cụm trong bài toán Phân khúc Khách hàng**
+## Tên dự án : **So sánh hiệu năng các thuật toán phân cụm trong bài toán Phân khúc Khách hàng**
 
 ---
 
@@ -240,34 +240,247 @@ Mỗi vai trò đảm nhận đúng 1 task trong mỗi Epic — đảm bảo kh�
 ```text
 Customer-Segmentation/
 │
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── external/
+├── data/                          # Lưu trữ toàn bộ dữ liệu của dự án
+│   ├── raw/                       # Dữ liệu gốc (không chỉnh sửa)
+│   ├── processed/                 # Dữ liệu sau tiền xử lý
+│   ├── external/                  # Dữ liệu bổ sung (nếu có)
+│   └── README.md                  # Mô tả nguồn dữ liệu
 │
-├── notebooks/
+├── docs/                          # Tài liệu kỹ thuật của dự án
+│   ├── data_specification.md      # Data Dictionary, Schema, Mapping, Business Rules
+│   ├── pipeline.md                # Pipeline và các Epic
+│   ├── architecture.md            # Kiến trúc hệ thống
+│   └── meeting_notes.md           # Biên bản họp nhóm
 │
-├── src/
-│   ├── data/
-│   ├── features/
-│   ├── models/
-│   ├── visualization/
-│   ├── utils/
-│   └── app/
+├── notebooks/                     # Notebook phục vụ EDA và thử nghiệm
+│   ├── 01_data_profiling.ipynb
+│   ├── 02_rfm_analysis.ipynb
+│   └── 03_model_experiments.ipynb
 │
-├── tests/
+├── src/                           # Mã nguồn chính của hệ thống
+│   ├── data/                      # Module tiền xử lý dữ liệu
+│   │   ├── loader.py
+│   │   ├── profiling.py
+│   │   ├── cleaning.py
+│   │   └── validation.py
+│   │
+│   ├── features/                  # Xây dựng đặc trưng
+│   │   ├── rfm.py
+│   │   ├── outlier.py
+│   │   └── scaling.py
+│   │
+│   ├── models/                    # Các thuật toán phân cụm
+│   │   ├── kmeans.py
+│   │   ├── gmm.py
+│   │   ├── hdbscan.py
+│   │   └── evaluation.py
+│   │
+│   ├── visualization/             # Dashboard và trực quan hóa
+│   │   ├── charts.py
+│   │   ├── pca.py
+│   │   └── cluster_profile.py
+│   │
+│   ├── app/                       # Streamlit Web Application
+│   │   ├── Home.py
+│   │   ├── pages/
+│   │   └── components/
+│   │
+│   └── utils/                     # Hàm dùng chung
+│       ├── config.py
+│       ├── helpers.py
+│       └── constants.py
 │
-├── docs/
+├── tests/                         # Unit Test và Integration Test
+│   ├── test_cleaning.py
+│   ├── test_rfm.py
+│   ├── test_models.py
+│   └── test_pipeline.py
 │
-├── outputs/
-│   ├── figures/
-│   ├── reports/
-│   └── results/
+├── outputs/                       # Kết quả sinh ra trong quá trình chạy
+│   ├── figures/                   # Hình ảnh, biểu đồ
+│   ├── reports/                   # Báo cáo
+│   └── results/                   # Kết quả phân cụm
 │
-├── requirements.txt
-├── README.md
-└── .gitignore
+├── requirements.txt               # Danh sách thư viện
+├── README.md                      # Giới thiệu dự án
+├── .gitignore                     # Các tệp không đưa lên GitHub
+└── LICENSE                        # Giấy phép (nếu có)
 ```
+
+---
+
+### Giải thích từng thư mục
+
+#### 1. `data/`
+
+Lưu trữ toàn bộ dữ liệu sử dụng trong dự án.
+
+| Thư mục | Chức năng |
+|----------|-----------|
+| `raw/` | Dữ liệu gốc được tải từ Kaggle hoặc UCI. Không chỉnh sửa trực tiếp. |
+| `processed/` | Dữ liệu sau khi làm sạch, chuẩn hóa và bổ sung các cột cần thiết. |
+| `external/` | Dữ liệu bên ngoài nếu dự án cần kết hợp thêm nguồn dữ liệu khác. |
+
+Nguyên tắc:
+
+- Không chỉnh sửa dữ liệu trong `raw/`.
+- Mọi kết quả tiền xử lý đều được lưu vào `processed/`.
+
+---
+
+#### 2. `docs/`
+
+Lưu toàn bộ tài liệu phục vụ phát triển dự án.
+
+Ví dụ:
+
+- Data Specification
+- Business Rules
+- Pipeline
+- Thiết kế hệ thống
+- Biên bản họp
+
+Thư mục này giúp mọi thành viên có chung tài liệu tham chiếu.
+
+---
+
+#### 3. `notebooks/`
+
+Dùng cho nghiên cứu và thử nghiệm.
+
+Không chứa mã nguồn chính của hệ thống.
+
+Ví dụ:
+
+- Khám phá dữ liệu (EDA)
+- Thử nghiệm tham số
+- Phân tích kết quả
+
+Sau khi thuật toán ổn định, mã sẽ được chuyển sang thư mục `src/`.
+
+---
+
+#### 4. `src/`
+
+Đây là nơi chứa toàn bộ mã nguồn chính của dự án.
+
+##### `src/data/`
+
+Các module xử lý dữ liệu.
+
+Ví dụ:
+
+- Đọc dữ liệu
+- Kiểm tra schema
+- Data Profiling
+- Data Cleaning
+
+Đây là phần hiện thực Epic 1.
+
+---
+
+##### `src/features/`
+
+Xây dựng đặc trưng.
+
+Bao gồm:
+
+- Tính Recency
+- Tính Frequency
+- Tính Monetary
+- Xử lý Outlier
+- Chuẩn hóa dữ liệu
+
+Đây là phần hiện thực Epic 2.
+
+---
+
+##### `src/models/`
+
+Triển khai các thuật toán phân cụm.
+
+Bao gồm:
+
+- K-Means
+- Gaussian Mixture Model
+- HDBSCAN
+- Chỉ số đánh giá
+
+Đây là phần hiện thực Epic 3.
+
+---
+
+##### `src/visualization/`
+
+Các thành phần trực quan hóa.
+
+Ví dụ:
+
+- PCA 2D
+- Cluster Profile
+- Radar Chart
+- Biểu đồ phân bố RFM
+
+Đây là phần hiện thực Epic 4.
+
+---
+
+##### `src/app/`
+
+Toàn bộ mã nguồn của ứng dụng Streamlit.
+
+Bao gồm:
+
+- Trang chủ
+- Các trang chức năng
+- Thành phần giao diện
+
+Pipeline chịu trách nhiệm chính.
+
+---
+
+##### `src/utils/`
+
+Các hàm tiện ích dùng chung.
+
+Ví dụ:
+
+- Đọc file cấu hình
+- Các hằng số
+- Hàm chuyển đổi dữ liệu
+
+Những hàm này có thể được sử dụng ở nhiều module khác nhau.
+
+---
+
+#### 5. `tests/`
+
+Chứa các chương trình kiểm thử.
+
+Ví dụ:
+
+- Kiểm thử Data Cleaning
+- Kiểm thử RFM
+- Kiểm thử mô hình
+- Kiểm thử toàn bộ pipeline
+
+Đây là khu vực làm việc chính của QA/QC.
+
+---
+
+#### 6. `outputs/`
+
+Lưu các kết quả được tạo ra khi chạy chương trình.
+
+Bao gồm:
+
+| Thư mục | Nội dung |
+|----------|----------|
+| `figures/` | Biểu đồ và hình ảnh |
+| `reports/` | Báo cáo kết quả |
+| `results/` | File CSV kết quả phân cụm |
+
+Thư mục này chỉ chứa kết quả đầu ra, không chứa mã nguồn.
 
 ---
 
