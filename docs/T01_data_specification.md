@@ -52,7 +52,7 @@ Thay vào đó, người dùng sẽ ánh xạ (Mapping) các cột trong file d�
 #### Các cột bắt buộc
 
 | Cột chuẩn | Mục đích |
-|-----------|----------|----------|
+|-----------|----------|
 | Invoice | Xác định hóa đơn và hóa đơn hủy |
 | StockCode | Xác định sản phẩm |
 | Quantity | Tính Frequency và Monetary |
@@ -78,7 +78,7 @@ Nếu thiếu hai cột này, hệ thống vẫn có thể thực hiện phân k
 Bảng dưới đây mô tả cấu trúc chuẩn của bộ dữ liệu **Online Retail II** được sử dụng trong dự án.
 
 | Cột | Kiểu dữ liệu | Bắt buộc  | Ràng buộc |
-|------|-------------|----------|-------|-----------|
+|------|-------------|----------|-----------|
 | Invoice | String | Có | Không được để trống |
 | StockCode | String | Có | Không được để trống |
 | Description | String | Không | Có thể thiếu |
