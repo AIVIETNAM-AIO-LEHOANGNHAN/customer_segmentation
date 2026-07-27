@@ -14,17 +14,22 @@ def fix_dtypes(df):
     # InvoiceDate to datetime
     df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], errors='coerce')
     
-    # Check invalid dates
-    invalid_dates = df['InvoiceDate'].isna().sum()
-    if invalid_dates > 0:
-        print(f"[fix_dtypes] Found {invalid_dates} rows with invalid InvoiceDate. Dropping them.")
-        df = df.dropna(subset=['InvoiceDate'])
+    # Quantity to numeric (QA-02)
+    if 'Quantity' in df.columns:
+        df['Quantity'] = pd.to_numeric(df['Quantity'], errors='coerce')
     
-    # Customer ID to string (keeping nan as missing)
-    df['Customer ID'] = df['Customer ID'].astype(str)
-    # Replace literal 'nan' string with actual pd.NA for consistent missing value handling, but since it's an ID, leaving 'nan' string or using None is a choice. We will use pd.NA for clean missing values check.
-    df['Customer ID'] = df['Customer ID'].replace('nan', pd.NA)
+    # Customer ID to string (keeping nan as missing) (QA-04)
+    if 'Customer ID' in df.columns:
+        df['Customer ID'] = df['Customer ID'].astype(str).str.replace(r'\.0$', '', regex=True)
+        df['Customer ID'] = df['Customer ID'].replace('nan', pd.NA)
     
+    return df
+
+def flag_invalid_date(df):
+    # (QA-03) Flag invalid dates instead of dropping them
+    if 'InvoiceDate' in df.columns:
+        df['HasInvalidDate'] = df['InvoiceDate'].isna()
+        print(f"[flag_invalid_date] Flagged {df['HasInvalidDate'].sum()} rows with invalid InvoiceDate.")
     return df
 
 def flag_cancelled(df):
@@ -38,8 +43,8 @@ def flag_missing_customer(df):
     return df
 
 def flag_special_stockcode(df):
-    special_codes = ['POST', 'DOT', 'M', 'BANK CHARGES', 'C2', 'ADJUST', 'CRUK']
-    df['IsServiceCode'] = df['StockCode'].astype(str).isin(special_codes)
+    special_codes = ['POST', 'DOT', 'M', 'BANK CHARGES', 'C2', 'ADJUST', 'CRUK', 'D', 'S', 'AMAZONFEE']
+    df['IsServiceCode'] = df['StockCode'].astype(str).str.upper().isin(special_codes)
     print(f"[flag_special_stockcode] Flagged {df['IsServiceCode'].sum()} rows with special StockCodes.")
     return df
 
@@ -48,14 +53,21 @@ def flag_price_anomaly(df):
     print(f"[flag_price_anomaly] Flagged {df['PriceAnomaly'].sum()} rows with Price <= 0.")
     return df
 
+def calc_total_price(df):
+    if 'Quantity' in df.columns and 'Price' in df.columns:
+        df['TotalPrice'] = df['Quantity'] * df['Price']
+    return df
+
 def clean_pipeline(df):
     print(f"--- Starting cleaning pipeline. Initial shape: {df.shape} ---")
     df = remove_duplicates(df)
     df = fix_dtypes(df)
+    df = flag_invalid_date(df)
     df = flag_cancelled(df)
     df = flag_missing_customer(df)
     df = flag_special_stockcode(df)
     df = flag_price_anomaly(df)
+    df = calc_total_price(df)
     print(f"--- Finished cleaning pipeline. Final shape: {df.shape} ---")
     return df
 
