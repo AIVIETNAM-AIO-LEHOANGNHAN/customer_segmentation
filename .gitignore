@@ -73,7 +73,7 @@ Thumbs.db
 # ==========================
 data/raw/*.zip
 data/raw/*.xlsx
-data/raw/*.xls
+data/raw/*.csv
 
 # ==========================
 # Environment variables
