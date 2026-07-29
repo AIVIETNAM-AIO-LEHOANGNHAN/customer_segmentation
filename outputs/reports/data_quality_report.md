@@ -6,375 +6,264 @@
 | **Epic** | KAN-4 — Giai đoạn 1: Khám phá, Làm sạch & Chuẩn hóa dữ liệu |
 | **Vai trò** | QA/QC |
 | **Người thực hiện** | Tam Tran |
-| **Ngày** | 27/07/2026 |
-| **Đối tượng kiểm thử** | `src/data/cleaning.py` (Task 2) @ `b52a0b3` — nhánh `task2-data-cleaning` |
+| **Vòng 1** | 27/07/2026 — Task 2 `b52a0b3` |
+| **Vòng 2** | **29/07/2026** — Task 2 `5cfc434` · Task 3 `510245c` · Task 4 `3d4248e` |
 | **Căn cứ đối chiếu** | `docs/T01_data_specification.md` mục 1.3, 2, 3 (BR-01 → BR-08) |
 
 ---
 
 ## 1. Tóm tắt cho Leader
 
-Module làm sạch của Task 2 **giữ đúng nguyên tắc cốt lõi "gắn cờ, không xoá vội"** trên cả 4 trường hợp đặc thù nhạy cảm nhất của Online Retail II. Đây là điều đáng ghi nhận — đây chính là chỗ dễ sai nhất và Data đã làm đúng:
+**Giai đoạn 1 đã tiến bộ rõ rệt, nhưng vẫn chưa đóng được.**
 
-- `Customer ID` null → **giữ dòng**, gắn cờ `HasCustomerID = False` ✅
-- Hóa đơn hủy (`C…`) → **giữ dòng**, gắn cờ `IsCancelled = True` ✅
-- Mã dịch vụ (`POST`, `DOT`…) → **giữ dòng**, gắn cờ `IsServiceCode = True` ✅
-- `Price = 0` → **giữ dòng**, gắn cờ `PriceAnomaly = True` ✅
+Vòng 1 phát hiện 12 vấn đề. Data đã sửa 5 vấn đề nặng nhất và QA xác nhận bằng test tự động. Task 3 và Task 4 hoàn thành, cả hai đều đạt chất lượng tốt:
 
-Toàn bộ 536.642 dòng sau xử lý tái lập được 100% khi QA chạy lại (mục 4).
+- **Task 3 (Pipeline)** — **6/6 hạng mục checklist Nhóm C đều ĐẠT**, kể cả hạng mục C3 mà QA đã cảnh báo sớm là cái bẫy tốn kém nhất của giai đoạn này.
+- **Task 4 (Model)** — **QA kiểm chứng độc lập 40 con số, cả 40 đều tái lập chính xác.**
 
-**Tuy nhiên, chưa thể đóng Giai đoạn 1.** Phát hiện **12 vấn đề**, trong đó **4 vấn đề mức Nghiêm trọng phải xử lý trước khi sang Giai đoạn 2** — cả 4 đều làm hỏng dữ liệu đầu vào của bước tính RFM chứ không phải lỗi hiển thị.
+Nhưng vòng 2 phát hiện **6 vấn đề mới**, trong đó 3 vấn đề mức Nghiêm trọng — và cả 3 đều là **lỗi ở mối nối giữa các vai trò**, không phải lỗi bên trong công việc của ai.
 
 | Mức độ | Mã | Số lượng | Yêu cầu |
 |---|---|---|---|
-| 🔴 **Nghiêm trọng** | QA-02, QA-03, QA-04, QA-07 | 4 | Phải fix trước khi sang Giai đoạn 2 |
-| 🟠 **Trung bình** | QA-01, QA-05, QA-08, QA-09 | 4 | Fix trong Giai đoạn 2, cần ghi nhận ngay |
-| 🟡 **Nhẹ** | QA-06, QA-10, QA-11, QA-12 | 4 | Cải thiện sau |
+| 🔴 **Nghiêm trọng** | QA-07, QA-13, QA-16, QA-17 | 4 | Phải xử lý trước khi sang Giai đoạn 2 |
+| 🟠 **Trung bình** | QA-01*, QA-08, QA-09*, QA-14, QA-15, QA-18 | 6 | Xử lý trong Giai đoạn 2 |
+| 🟡 **Nhẹ** | QA-06*, QA-10, QA-11, QA-12 | 4 | Cải thiện sau |
+| ✅ **Đã sửa & xác nhận** | QA-02, QA-03, QA-04, QA-05 | 4 | — |
 
-**Kết quả kiểm thử tự động:** 23 tiêu chí — **16 ĐẠT / 7 KHÔNG ĐẠT**. Chi tiết: [`qa_test_results.md`](qa_test_results.md).
+<sup>*Sửa một phần.</sup>
 
-**Hạng mục chưa thực thi được:** toàn bộ Nhóm C (UI upload & mapping — Task 3) vì Task 3 chưa có mã nguồn. Xem mục 6.
+**Kết quả kiểm thử tự động vòng 2:** 29 tiêu chí — **26 ĐẠT / 3 KHÔNG ĐẠT** *(vòng 1: 16/23)*.
+Bộ test: **43 passed, 4 xfailed**. Chi tiết: [`qa_test_results.md`](qa_test_results.md).
+
+### Một câu cho Leader
+
+> Ba lỗi Nghiêm trọng mới **không nằm trong code của bất kỳ ai** — chúng nằm ở chỗ các vai trò gặp nhau: Data sửa code nhưng chưa sinh lại file kết quả (QA-13), nên Model phân tích trên dữ liệu cũ (QA-17); và Pipeline code theo tài liệu trong khi tài liệu lệch với dữ liệu thật (QA-16, gốc là QA-08 chưa được chốt từ vòng 1). Đây là dấu hiệu nhóm cần **một điểm chốt schema và một quy ước "ai sinh lại artifact khi nào"**, chứ không phải dấu hiệu ai đó làm ẩu.
 
 ---
 
-## 2. Phạm vi đã kiểm thử
+## 2. Những gì đã được sửa và QA đã xác nhận
 
-| Bước (theo KAN-12) | Trạng thái |
-|---|---|
-| Bước 1 — Đọc đặc tả, chốt "đáp án đúng" | ✅ Hoàn thành |
-| Bước 2 — Xây checklist 2 nhóm | ✅ Hoàn thành — [`docs/qa_checklist_data.md`](../../docs/qa_checklist_data.md) |
-| Bước 3 — Chuẩn bị 7 file test lỗi cố ý | ✅ Hoàn thành — `data/test_samples/` |
-| Bước 4 — Chạy toàn bộ luồng với từng file test | ⚠️ Chạy được phần **làm sạch**; phần **upload → mapping** bị chặn (Task 3 chưa có) |
-| Bước 5 — Test riêng UI mapping | ⛔ **Chưa thực thi được** — xem mục 6 |
-| Bước 6 — Đối chiếu số liệu với Task 2 | ✅ Hoàn thành — mục 4 |
-| Bước 7 — Viết báo cáo, phân loại theo mức ưu tiên | ✅ Tài liệu này |
+Bộ test dùng `@pytest.mark.xfail(strict=True)`. Khi chạy lại trên commit `5cfc434`, **6 test chuyển sang XPASS** — pytest tự phát hiện "lỗi này đã hết" mà QA không cần đọc lại code.
 
-**Môi trường:** Python 3.13.14, pandas 2.3.0, numpy 2.3.1, pytest 9.1.1, Windows 10.
+| Mã | Nội dung | Bằng chứng đã sửa |
+|---|---|---|
+| **QA-02** | `Quantity` không ép kiểu số | `to_numeric(errors='coerce')`; `test_wrong_dtype.csv` giữ đủ 300 dòng, dtype `float64` |
+| **QA-03** | `InvoiceDate` lỗi bị xoá không cờ | Thêm `flag_invalid_date()` → cột `HasInvalidDate`; 5 dòng ngày sai được giữ + gắn cờ |
+| **QA-04** | `Customer ID` thành `17850.0` | 0/225 mã còn đuôi `.0`; `nunique` không đổi (không gộp nhầm khách) |
+| **QA-05** | Thiếu cột `TotalPrice` | Thêm `calc_total_price()`; đủ 4 cột phái sinh theo schema mục 1.3 |
+| **QA-01** | Sót mã dịch vụ | Thêm `D`, `S`, `AMAZONFEE` + `.str.upper()` → `m` bắt được; 12/12 dòng mẫu |
+
+QA cũng bổ sung **regression test** cho rủi ro của bản sửa: `.str.upper()` **không** gắn cờ nhầm mã sản phẩm thật (`85123A`, `DCGSSGIRL`, `DCGSSBOY`, `PADS`), và việc sửa định dạng `Customer ID` **không** gộp hai khách hàng làm một.
 
 ---
 
 ## 3. Bảng đối chiếu kết quả test (kỳ vọng vs thực tế)
 
-Sinh tự động bằng `python scripts/run_qa_scenarios.py`.
+Sinh tự động bằng `python scripts/run_qa_scenarios.py` — 29 tiêu chí, 26 ĐẠT / 3 KHÔNG ĐẠT.
+Bảng đầy đủ: [`qa_test_results.md`](qa_test_results.md). Ba tiêu chí KHÔNG ĐẠT:
 
-| File test | Business Rule | Tiêu chí | Kỳ vọng | Thực tế | Kết luận |
-|---|---|---|---|---|---|
-| `base_sample.csv` | Schema 1.3 | Không mất dòng trên dữ liệu sạch | 300 dòng | 300 dòng | ✅ |
-| `base_sample.csv` | Schema 1.3 | Đủ 4 cột phái sinh | 4 cột | 3 cột | ❌ QA-05 |
-| `base_sample.csv` | Schema 1.3 | Có cột `TotalPrice` | có | thiếu | ❌ QA-05 |
-| `base_sample.csv` | Schema 2 | `InvoiceDate` là datetime | `datetime64` | `datetime64[ns]` | ✅ |
-| `base_sample.csv` | Schema 2 | `Price` là numeric | float | `float64` | ✅ |
-| `test_missing_customerid.csv` | BR-03 | Dòng `Customer ID` null còn tồn tại | 300 dòng | 300 dòng | ✅ |
-| `test_missing_customerid.csv` | BR-03 | `HasCustomerID = False` được gắn cờ | 75 dòng | 75 dòng | ✅ |
-| `test_missing_customerid.csv` | Mục 1.2 | `Customer ID` giữ đúng định dạng | 0 mã lệch | **225/225 mã thành `17850.0`** | ❌ QA-04 |
-| `test_cancelled_invoice.csv` | BR-01 | Hóa đơn hủy không bị xoá | 320 dòng | 320 dòng | ✅ |
-| `test_cancelled_invoice.csv` | BR-01 | `IsCancelled = True` được gắn cờ | 20 dòng | 20 dòng | ✅ |
-| `test_cancelled_invoice.csv` | BR-02 | `Quantity` âm được giữ lại | 20 dòng | 20 dòng | ✅ |
-| `test_service_code.csv` | BR-05 | Dòng mã dịch vụ không bị xoá | 312 dòng | 312 dòng | ✅ |
-| `test_service_code.csv` | BR-05 | Gắn cờ `IsServiceCode` đầy đủ | 12 dòng | **8 dòng** | ❌ QA-01 |
-| `test_service_code.csv` | BR-05 | Không sót mã nào | sót 0 | **sót 4: `AMAZONFEE`, `D`, `S`, `m`** | ❌ QA-01 |
-| `test_zero_price.csv` | BR-04 | Dòng `Price = 0` không bị xoá | 300 dòng | 300 dòng | ✅ |
-| `test_zero_price.csv` | BR-04 | Được gắn cờ giá bất thường | 15 dòng | 15 dòng | ✅ |
-| `test_missing_column.csv` | Mục 1.4 | Chặn xử lý khi thiếu cột bắt buộc | báo lỗi & dừng | dừng bằng `KeyError` | ✅ |
-| `test_missing_column.csv` | Mục 1.4 | Thông báo lỗi rõ ràng | nêu rõ cột thiếu | `KeyError: 'InvoiceDate'` | ⚠️ QA-06 |
-| `test_wrong_dtype.csv` | — | Không crash khi sai kiểu | không crash | không crash | ✅ |
-| `test_wrong_dtype.csv` | Schema 2 | `Quantity` sau xử lý là kiểu số | numeric | **`object`** | ❌ QA-02 |
-| `test_wrong_dtype.csv` | Schema 2 | `InvoiceDate` sau xử lý là datetime | `datetime64` | `datetime64[ns]` | ✅ |
-| `test_wrong_dtype.csv` | BR-07 | Ngày sai được gắn cờ, không xoá âm thầm | 0 dòng xoá không cờ | **5 dòng bị xoá, không cờ** | ❌ QA-03 |
-| `test_duplicate.csv` | BR-06 | Duplicate bị loại, giữ 1 bản ghi | 300 dòng | 300 dòng | ✅ |
+| File / đối tượng | Tiêu chí | Kỳ vọng | Thực tế | Mã lỗi |
+|---|---|---|---|---|
+| `test_wrong_dtype.csv` | Dòng `Quantity` ép kiểu hỏng được gắn cờ | có cột cờ riêng | 0 cột cờ | **QA-14** |
+| `base_sample.csv` | Luồng batch và luồng UI cho cùng schema | cùng bộ tên cột | lệch 3 cột | **QA-16** |
+| `data/processed/cleaned_transactions.csv` | File sinh lại sau khi sửa module | có `TotalPrice` + `HasInvalidDate` | 12 cột, thiếu cả hai | **QA-13** |
 
 ---
 
-## 4. Đối chiếu số liệu với báo cáo của Data (Bước 6)
+## 4. Kết quả kiểm thử Task 3 — UI Upload & Mapping *(lần đầu chạy được)*
 
-QA nạp lại `data/raw/online_retail_II.csv`, chạy lại `clean_pipeline()` và so với file `data/processed/cleaned_transactions.csv` mà Data đã commit.
+Vòng 1 phải bỏ trống toàn bộ Nhóm C vì Task 3 chưa có mã nguồn. Vòng 2 đã chạy đủ, bằng `tests/test_upload_mapping.py`.
 
-| Chỉ số | Data commit | QA chạy lại | Chênh lệch |
+| # | Hạng mục | Kết quả |
+|---|---|---|
+| C1 | Mapping tự động khớp 8 cột file gốc | ✅ **8/8** |
+| C2 | Mapping thủ công với file đổi tên cột | ✅ |
+| **C3** | **File nhiều `Customer ID` null vẫn được chấp nhận** | ✅ **ĐẠT** |
+| C4 | Thiếu cột bắt buộc → chặn, báo lỗi rõ | ✅ |
+| C5 | Thiếu cột tùy chọn vẫn cho đi tiếp | ✅ |
+| C6 | File sai kiểu dữ liệu không làm sập app | ✅ |
+| C7–C10 | Chống map trùng, map sai, chuẩn hoá tên cột, chặn đuôi file lạ | ✅ |
+| C11 | Luồng batch và UI cho cùng schema | ❌ **QA-16** |
+
+**Về C3:** ở vòng 1 QA cảnh báo rằng schema mục 2 ghi `Customer ID` là *"Có (đối với RFM)"* rất dễ bị hiện thực nhầm thành ràng buộc `NOT NULL`, sẽ chặn mất 135.037 dòng ngay từ cửa. **Pipeline đã làm đúng** — `validate_mapping()` chỉ kiểm cột có được *ánh xạ* hay không, không đụng tới giá trị. QA đã chạy trọn luồng với file 25% null: qua validate, giữ đủ 300 dòng, gắn cờ đúng 75.
+
+---
+
+## 5. Đối chiếu số liệu Task 4 — QA kiểm chứng độc lập
+
+QA không đọc lại notebook rồi gật đầu. QA viết script riêng, tự nạp `cleaned_transactions.csv`, tính lại từ đầu và so từng con số với báo cáo `outputs/reports/data_quality_stats.md`.
+
+| Nhóm chỉ số | Số mục kiểm | Kết quả |
+|---|---:|---|
+| Tổng quan + tỷ lệ từng cờ | 11 | ✅ khớp tuyệt đối |
+| Giả thuyết hủy đơn ↔ `Quantity` âm | 6 | ✅ khớp tuyệt đối |
+| Mã phi-sản-phẩm chưa gắn cờ (mục 3.4) | 8 | ✅ khớp tuyệt đối |
+| Tập hợp lệ + outlier IQR | 8 | ✅ khớp tuyệt đối |
+| Skewness + Monetary cấp khách hàng | 7 | ✅ khớp tuyệt đối |
+| | **40** | **40/40 tái lập được** |
+
+Đáng chú ý: **mục 3.4 của Task 4 trùng khớp với lỗi QA-01 mà QA phát hiện độc lập ở vòng 1.** Hai vai trò, hai phương pháp khác nhau (QA dựng file test lỗi cố ý; Model quét ngược `StockCode` không theo pattern 5 chữ số), cùng chỉ ra `AMAZONFEE`, `B`, `D`, `S`. Model còn định lượng được tác động tiền tệ mà QA không có.
+
+---
+
+## 6. Vấn đề mới phát hiện ở vòng 2
+
+### 🔴 QA-13 (Nghiêm trọng) — `cleaned_transactions.csv` chưa được sinh lại
+
+**Vai trò xử lý: Data.**
+
+Code đã sửa nhưng file kết quả trong repo vẫn là bản sinh ra *trước* khi sửa:
+
+| Kiểm tra | File đang commit | Chạy lại code hiện tại |
+|---|---|---|
+| Số cột | **12** | **14** |
+| Có `TotalPrice` | ❌ thiếu | ✅ |
+| Có `HasInvalidDate` | ❌ thiếu | ✅ |
+| Mẫu `Customer ID` | **`17850.0`** | `17850` |
+| `IsServiceCode` | **2.730 dòng** | **2.904 dòng** |
+
+Nghĩa là **QA-04 và QA-05 đã sửa trong code nhưng vẫn còn nguyên trong dữ liệu mà cả nhóm đang dùng.** Đây không phải vấn đề lý thuyết — nó đã trực tiếp gây ra QA-17 bên dưới.
+
+**Cần làm:** chạy `python src/data/cleaning.py`, commit file mới, báo Model chạy lại EDA.
+
+---
+
+### 🔴 QA-16 (Nghiêm trọng) — Hai luồng chạy cho ra hai schema khác nhau
+
+**Vai trò xử lý: Pipeline + Leader.**
+
+| | Luồng batch<br>`python src/data/cleaning.py` | Luồng UI<br>upload → mapping → clean |
+|---|---|---|
+| Mã hóa đơn | `Invoice` | **`InvoiceNo`** |
+| Đơn giá | `Price` | **`UnitPrice`** |
+| Mã khách | `Customer ID` | **`CustomerID`** |
+| Tên file xuất | `cleaned_transactions.csv` | `cleaned_transactions.csv` |
+
+Nguyên nhân: `STANDARD_COLUMNS` trong `column_mapper.py` dùng bộ tên của **Online Retail I** — đúng theo tài liệu, nhưng tài liệu đang lệch với dữ liệu thật. **Đây chính là hậu quả của QA-08 vòng 1 chưa được chốt.**
+
+**Vì sao nghiêm trọng.** Epic 2 sẽ viết `rfm.groupby("Customer ID")`. Code đó chạy được với file batch, hỏng với file tải từ UI — cùng một tên file, hai cấu trúc. Lỗi sẽ xuất hiện dưới dạng `KeyError` ngẫu nhiên tùy người dùng lấy file từ đâu.
+
+Hàm `_first_existing_column()` mà Pipeline thêm vào giúp *module làm sạch* chịu được cả hai tên, nhưng **file xuất ra vẫn mang hai schema** — mọi module hạ nguồn sẽ phải lặp lại đúng thủ thuật đó.
+
+**Cần làm:** Leader chốt một bộ tên chuẩn (QA đề nghị lấy theo dữ liệu thật: `Invoice`, `Price`, `Customer ID`), Pipeline sửa `STANDARD_COLUMNS` cho khớp. Giữ nguyên `DEFAULT_COLUMN_ALIASES` để người dùng upload kiểu nào cũng khớp.
+
+---
+
+### 🔴 QA-17 (Nghiêm trọng) — EDA Task 4 chạy trên dữ liệu lỗi thời
+
+**Vai trò xử lý: Model (sau khi Data xong QA-13).**
+
+Báo cáo Task 4 được tính trên bản `cleaned_transactions.csv` cũ. Model dùng đúng dữ liệu có trong repo tại thời điểm đó — **không ai làm sai quy trình** — nhưng kết quả cần làm mới.
+
+| Chỉ số | Báo cáo hiện tại | Sau khi sinh lại | Ghi chú |
+|---|---:|---:|---|
+| `IsServiceCode` số dòng | 2.730 | **2.904** | +174 dòng |
+| **`IsServiceCode` đóng góp `TotalPrice`** | **+£195.336,86** | **−£34.916,96** | ⚠️ **đổi dấu**, lệch £230.253,82 |
+| Tập hợp lệ | 525.075 | 525.070 | −5 dòng |
+| Outlier trên | 41.124 | 41.122 | −2 dòng |
+| Outlier % doanh thu | 50,77% | 50,71% | gần như không đổi |
+
+**Phải viết lại:** mục 1 (bảng tổng quan), mục 3.1 và 3.2 (đổi nhiều nhất — kết luận về đóng góp của mã dịch vụ đổi dấu), mục 3.4 (`AMAZONFEE`, `D`, `S` đã được sửa; chỉ còn `B` và `gift_*`), mục 8 (bảng kiểm chứng bộ lọc).
+
+**Giữ nguyên, không ảnh hưởng:** mục 2 (hủy đơn ↔ `Quantity` âm), mục 5 (outlier/B2B — lệch 2 dòng trên 41.124), mục 6 (skewness, log-transform), mục 10 (đề xuất công thức RFM).
+
+---
+
+### 🟠 QA-14 (Trung bình) — `Quantity` ép kiểu hỏng không có cờ
+
+**Vai trò xử lý: Data.**
+
+Cách xử lý hai loại lỗi giống hệt nhau đang bất đối xứng:
+
+| Trường hợp | Ép kiểu | Giữ dòng | Có cờ |
 |---|---|---|---|
-| Số dòng thô ban đầu | 541.910 | 541.910 | — |
-| Số dòng sau làm sạch | 536.642 | 536.642 | **Khớp** |
-| Số dòng bị loại (duplicate) | 5.268 | 5.268 | **Khớp** |
-| Số cột | 12 | 12 | **Khớp** |
-| `IsCancelled = True` | 9.251 (1,72%) | 9.251 | **Khớp** |
-| `HasCustomerID = False` | 135.037 (25,16%) | 135.037 | **Khớp** |
-| `IsServiceCode = True` | 2.730 (0,51%) | 2.730 | **Khớp** |
-| `PriceAnomaly = True` | 2.512 (0,47%) | 2.512 | **Khớp** |
+| `InvoiceDate` không parse được | `to_datetime(errors='coerce')` | ✅ | ✅ `HasInvalidDate` |
+| `Quantity` không parse được | `to_numeric(errors='coerce')` | ✅ | ❌ **không có** |
 
-**Kết luận:** không có chênh lệch bất thường. Pipeline **tái lập được hoàn toàn** — chạy lại trên máy khác cho ra đúng cùng con số. Tỷ lệ `HasCustomerID = False` là **25,16%**, khớp với con số ~25% nêu trong mô tả task.
+10 dòng `Quantity = "abc"` được giữ lại (đúng) nhưng lặng lẽ thành `NaN`, không cột nào ghi nhận. Xuống Epic 2, `groupby().sum()` bỏ qua `NaN` không báo gì — Monetary thiếu một phần mà không ai biết.
 
-Lưu ý: các con số này khớp *về mặt số lượng*, nhưng **không có nghĩa là đúng về mặt nghiệp vụ** — QA-01 (sót mã dịch vụ) khiến con số 2.730 bị **thiếu khoảng 212 dòng** so với đúng đặc tả (xem QA-01).
+**Cần làm:** thêm `flag_invalid_quantity()` đối xứng với `flag_invalid_date()`.
 
 ---
 
-## 5. Danh sách vấn đề theo mức ưu tiên
+### 🟠 QA-15 (Trung bình) — Task 3 sửa file thuộc sở hữu Task 2
 
-### 🔴 Mức NGHIÊM TRỌNG — phải fix trước khi sang Giai đoạn 2
+**Vai trò xử lý: Pipeline + Data.**
 
----
+Commit `510245c` sửa 74 dòng trong `src/data/cleaning.py` — deliverable của Task 2.
 
-#### QA-04 — `Customer ID` bị đổi định dạng thành `17850.0`
+Về kỹ thuật bản sửa tốt (`_first_existing_column()` gọn, thông điệp lỗi rõ, còn tiện tay bổ sung ép kiểu cho `Price` mà Data chưa làm). Về quy trình thì có rủi ro: sau khi merge, bản `cleaning.py` trên `develop` là bản của Pipeline, không phải bản Data đang thấy. Lần tới Data sửa tiếp file này, khả năng cao sẽ xung đột.
 
-| | |
-|---|---|
-| **Vị trí** | `src/data/cleaning.py:24` — `df['Customer ID'] = df['Customer ID'].astype(str)` |
-| **Ảnh hưởng** | **401.605 dòng (100% số dòng có Customer ID)** trong `data/processed/cleaned_transactions.csv` đã commit |
-
-**Hiện tượng.** Vì dataset gốc có 25% giá trị null, pandas đọc `Customer ID` lên thành `float64`. Gọi `astype(str)` trên cột float sinh ra chuỗi `'17850.0'` thay vì `'17850'`.
-
-Kiểm chứng trực tiếp trên file Data đã commit:
-
-```
-Customer ID mẫu trong cleaned_transactions.csv: ['17850.0', '17850.0', '17850.0']
-```
-
-**Vì sao nghiêm trọng.** `Customer ID` là **khoá gom nhóm của toàn bộ RFM** (Epic 2). Schema mục 1.2 quy định kiểu `String`, ví dụ `17850`. Hậu quả:
-- Mọi kết quả phân cụm xuất ra sẽ mang mã khách hàng sai định dạng, không đối chiếu ngược được với hệ thống nguồn của doanh nghiệp.
-- Không join được với bất kỳ nguồn dữ liệu khách hàng nào khác.
-- Bước xuất CSV ở Epic 4 sẽ giao cho người dùng cuối một cột mã hỏng.
-
-**Đề xuất fix:**
-
-```python
-df['Customer ID'] = df['Customer ID'].astype('Int64').astype(str).replace('<NA>', pd.NA)
-```
+> QA đã thử merge cả `task-3-upload-mapping` và `task4-eda` vào `develop` — **hiện không xung đột**, `cleaning.py` không bị mất. Không cần xử lý gấp, nhưng cần thống nhất quyền sở hữu.
 
 ---
 
-#### QA-03 — Dòng `InvoiceDate` lỗi bị xoá thẳng, không gắn cờ
+### 🟠 QA-18 (Trung bình) — Nhánh `task4-eda` không có `cleaning.py`
 
-| | |
-|---|---|
-| **Vị trí** | `src/data/cleaning.py:18-21` — `df = df.dropna(subset=['InvoiceDate'])` |
-| **Bằng chứng** | `test_wrong_dtype.csv`: 5 dòng ngày sai → biến mất, không có cột cờ nào ghi nhận |
+**Vai trò xử lý: Model.**
 
-**Hiện tượng.** `to_datetime(errors='coerce')` biến ngày không parse được thành `NaT`, rồi `dropna()` xoá luôn các dòng đó.
+Nhánh tạo ra từ `a367feb` — commit revert Task 2 trên `main` — nên không có `src/data/cleaning.py`. Model không thể tự chạy lại pipeline trên nhánh của mình, chỉ dùng được file commit sẵn (đúng file đã lỗi thời ở QA-17).
 
-**Vì sao nghiêm trọng.** BR-07 quy định *"**Đánh dấu lỗi** và loại khỏi tập dữ liệu phân tích nếu không thể khắc phục"* — hai vế: **đánh dấu trước, loại sau**, và chỉ loại ở **tập phân tích**, không phải ở `data/processed/`. Code hiện tại bỏ hẳn vế đánh dấu và xoá ngay ở bước làm sạch. Đây đúng là kiểu vi phạm nguyên tắc "gắn cờ, không xoá vội" mà task này được lập ra để chặn.
-
-Trên dữ liệu gốc hiện tại con số là **0 dòng** (mọi ngày đều parse được), nên lỗi này *chưa gây thiệt hại*. Nhưng hệ thống được thiết kế để **người dùng upload file bất kỳ** — với file thật của doanh nghiệp, dữ liệu sẽ âm thầm bốc hơi mà không ai biết bao nhiêu dòng đã mất.
-
-**Đề xuất fix:** thêm cột `HasValidDate`, giữ nguyên dòng ở `data/processed/`, chỉ lọc ở bước tính RFM.
+> QA ban đầu lo commit revert sẽ kéo theo xoá `cleaning.py` khi merge vào `develop`. **Đã thử nghiệm: không xảy ra, merge sạch.** Không có rủi ro merge; chỉ cần merge `develop` vào nhánh này để Model tự sinh được dữ liệu tươi.
 
 ---
 
-#### QA-07 — Dataset chỉ chứa một nửa Online Retail II
+## 7. Vấn đề còn mở từ vòng 1
 
-| | |
-|---|---|
-| **Vị trí** | `data/raw/online_retail_II.csv` |
-| **Bằng chứng** | 541.910 dòng, khoảng thời gian **01/12/2010 → 09/12/2011** |
-
-**Hiện tượng.** Bộ **Online Retail II** đầy đủ gồm 2 sheet — *Year 2009-2010* và *Year 2010-2011* — tổng khoảng **1.067.371 dòng**, trải từ 01/12/2009. File trong repo chỉ có sheet 2010-2011, tức **thiếu khoảng 525.000 giao dịch của năm đầu**. Đây thực chất là bộ *Online Retail* (bản I) chứ không phải *Online Retail II*.
-
-**Vì sao nghiêm trọng.** README dự án ghi *"Khoảng 1 triệu giao dịch"* và *"Dữ liệu giao dịch trong nhiều năm"* — cả hai đều không đúng với file hiện có. Hậu quả:
-- Recency, Frequency, Monetary tính trên 12 tháng thay vì 24 tháng → chân dung khách hàng lệch, khách mua năm 2009-2010 bị mất hoàn toàn.
-- Báo cáo so sánh 3 thuật toán ở Epic 4 sẽ mô tả sai quy mô dữ liệu.
-
-**Đề xuất:** Leader và Data xác nhận — hoặc bổ sung sheet 2009-2010 vào `data/raw/`, hoặc sửa README và tài liệu cho khớp phạm vi dữ liệu thực tế. **Cần chốt trước khi Epic 2 bắt đầu tính RFM**, vì đổi phạm vi dữ liệu sau đó đồng nghĩa làm lại toàn bộ.
+| Mã | Nội dung | Mức | Trạng thái |
+|---|---|---|---|
+| **QA-07** | Dataset chỉ có 541.910 dòng (12/2010→12/2011), thiếu nửa năm 2009-2010 của Online Retail II. README ghi "khoảng 1 triệu giao dịch" | 🔴 Nghiêm trọng | **Chưa xử lý** — cần Leader + Data chốt trước khi Epic 2 tính RFM |
+| **QA-08** | Tài liệu dùng `InvoiceNo`/`UnitPrice`/`CustomerID`, dữ liệu thật dùng `Invoice`/`Price`/`Customer ID` | 🟠 Trung bình | **Chưa chốt — đã gây ra QA-16** |
+| QA-01 | Còn sót `B` (3 dòng, ròng −£11.062,06) và `gift_0001_*` (34 dòng) | 🟠 Trung bình | Sửa một phần |
+| QA-09 | `requirements.txt` | 🟠 Trung bình | Task 3 thêm 3 dòng; còn thiếu `pytest`, thư viện Epic 3 |
+| QA-06 | Lỗi thiếu cột vẫn là `KeyError` | 🟡 Nhẹ | Thông điệp đã tốt hơn nhờ Task 3 |
+| QA-10 | File 60 MB `cleaned_transactions.csv` bị commit | 🟡 Nhẹ | Chưa xử lý |
+| QA-11 | Hóa đơn tiền tố `A` chưa có quy tắc | 🟡 Nhẹ | Chưa xử lý |
+| QA-12 | Chất lượng mã nguồn module làm sạch | 🟡 Nhẹ | Chưa xử lý |
 
 ---
 
-#### QA-02 — `Quantity` không được ép kiểu số
-
-| | |
-|---|---|
-| **Vị trí** | `src/data/cleaning.py:12-28` — `fix_dtypes()` chỉ xử lý `InvoiceDate` và `Customer ID` |
-| **Bằng chứng** | `test_wrong_dtype.csv`: 10 dòng `Quantity = "abc"` đi qua trọn vẹn, cột giữ dtype `object` |
-
-**Hiện tượng.** Không có bước `to_numeric` cho `Quantity` (và cũng không cho `Price`). Với file gốc, pandas tự suy ra `int64` nên không lộ vấn đề — nhưng chỉ cần **một** ô chứa text là **cả cột** rơi về `object`, và khi đó *mọi* giá trị trong cột đều thành chuỗi, kể cả các dòng hợp lệ:
-
-```
-Quantity dtype: object
-sample values: ['abc', '6', '8']      <- '6' và '8' vốn là số, giờ là chuỗi
-```
-
-**Vì sao nghiêm trọng.** QA đã chạy thử 4 phép toán mà Epic 2 chắc chắn dùng, trên đúng cột `Quantity` sau khi qua `clean_pipeline()`:
-
-| Phép toán ở Epic 2 | Kết quả thực tế |
-|---|---|
-| `Quantity × Price` (Monetary) | 💥 `TypeError: can't multiply sequence by non-int of type 'float'` |
-| `Quantity < 0` (lọc hóa đơn hủy) | 💥 `TypeError: '<' not supported between 'str' and 'int'` |
-| `Quantity.sum()` | ⚠️ **Không báo lỗi**, trả về `'abc686666663333266866323344324241212abc…'` |
-| `groupby('Customer ID')['Quantity'].sum()` | ⚠️ **Không báo lỗi**, trả về `'68126463244222424'` cho từng khách hàng |
-
-Hai dòng đầu chỉ gây crash — khó chịu nhưng *lộ ra ngay*. **Hai dòng cuối mới là vấn đề thật:** `groupby(...).sum()` chính là phép toán trung tâm của Frequency và Monetary, và ở dtype `object` nó **nối chuỗi thay vì cộng số, không phát sinh bất kỳ exception nào**. Kết quả RFM sẽ là những con số vô nghĩa dài hàng chục chữ số, chảy thẳng vào bước phân cụm mà không có gì cảnh báo.
-
-**Đề xuất fix:** trong `fix_dtypes()`, thêm ép kiểu cho `Quantity` và `Price` bằng `pd.to_numeric(..., errors='coerce')`, gắn cờ dòng ép hỏng thay vì xoá.
-
-> *Ghi chú phân loại:* theo rubric của KAN-12 thì "Nghiêm trọng" định nghĩa là xoá nhầm dữ liệu. QA-02 không xoá dữ liệu nhưng **làm hỏng dữ liệu một cách âm thầm ở bước kế tiếp**, hậu quả tương đương hoặc nặng hơn (sai mà không ai biết), nên QA xếp mức Nghiêm trọng. Đề nghị Leader xác nhận.
-
----
-
-### 🟠 Mức TRUNG BÌNH — ghi nhận ngay, fix trong Giai đoạn 2
-
----
-
-#### QA-01 — Sót mã dịch vụ: `D`, `S`, `AMAZONFEE`, và biến thể chữ thường `m`
-
-| | |
-|---|---|
-| **Vị trí** | `src/data/cleaning.py:41` — `special_codes = ['POST','DOT','M','BANK CHARGES','C2','ADJUST','CRUK']` |
-| **Bằng chứng** | `test_service_code.csv`: chỉ 8/12 dòng được gắn cờ |
-
-**Hiện tượng.** Quét toàn bộ dữ liệu gốc, các `StockCode` mang ngữ nghĩa dịch vụ nhưng **không** có trong danh sách:
-
-| StockCode | Description | Số dòng trong dữ liệu gốc |
-|---|---|---|
-| `D` | Discount | 77 |
-| `S` | SAMPLES | 63 |
-| `AMAZONFEE` | AMAZON FEE | 34 |
-| `gift_0001_*` | Dotcomgiftshop Gift Voucher | 34 |
-| `B` | Adjust bad debt | 3 |
-| `m` | Manual *(chữ thường của `M` đã có trong list)* | 1 |
-| | **Tổng bỏ sót** | **≈ 212 dòng** |
-
-Ngoài ra `'ADJUST'` có trong danh sách nhưng **không tồn tại** trong dữ liệu (0 dòng) — có vẻ chép từ tài liệu khác.
-
-**Ảnh hưởng.** 212 dòng phí dịch vụ/chiết khấu sẽ bị tính nhầm thành **giao dịch mua hàng thật** ở Frequency và Monetary. Riêng `AMAZONFEE` và `D` có giá trị tiền lớn nên đủ sức đẩy lệch Monetary của một vài khách hàng. Con số `IsServiceCode = 2.730` ở mục 4 vì vậy **thiếu khoảng 212** so với đúng đặc tả.
-
-**Đề xuất fix:** bổ sung `D`, `S`, `AMAZONFEE`, `B`, tiền tố `gift_`; so khớp **không phân biệt hoa/thường** (`.str.upper()`); bỏ `ADJUST` hoặc giữ lại kèm ghi chú.
-
----
-
-#### QA-05 — Thiếu cột `TotalPrice`
-
-**Vị trí:** `src/data/cleaning.py:51-60` — `clean_pipeline()`
-
-Schema mục 1.3 quy định 4 cột phái sinh sau tiền xử lý. Pipeline sinh ra 3 (`IsCancelled`, `HasCustomerID`, `IsServiceCode`) cộng thêm `PriceAnomaly` (ngoài schema, chấp nhận được vì phục vụ BR-04), nhưng **thiếu `TotalPrice = Quantity × Price`**. Epic 2 cần cột này để tính Monetary.
-
-**Đề xuất:** hoặc Data bổ sung vào `clean_pipeline()`, hoặc Leader cập nhật schema chuyển `TotalPrice` sang trách nhiệm của Epic 2. Cần chốt để Model không phải đoán.
-
----
-
-#### QA-08 — Tên cột trong tài liệu lệch với dữ liệu thật
-
-Tài liệu và dữ liệu đang dùng hai bộ tên khác nhau:
-
-| Tài liệu (README, mô tả task, schema mục 1.3 & 1.4) | Dữ liệu thật + `cleaning.py` |
-|---|---|
-| `InvoiceNo` | `Invoice` |
-| `UnitPrice` | `Price` |
-| `CustomerID` | `Customer ID` *(có dấu cách)* |
-
-Bảng schema mục 2 dùng tên đúng (`Invoice`, `Price`, `Customer ID`), nhưng mục 1.3 và 1.4 trong **cùng một tài liệu** lại dùng tên cũ của bộ Online Retail I.
-
-**Ảnh hưởng.** Pipeline (Task 3) xây dictionary mapping dựa trên tài liệu sẽ sinh ra key sai và mapping tự động trượt toàn bộ. Rủi ro cao vì Task 3 chưa code — sửa tài liệu bây giờ là rẻ nhất.
-
-**Đề xuất:** Leader thống nhất một bộ tên duy nhất trong `docs/T01_data_specification.md`, ưu tiên tên khớp dữ liệu thật.
-
----
-
-#### QA-09 — `requirements.txt` rỗng
-
-File tồn tại nhưng **0 byte**. Không ai dựng lại được môi trường, và không có ràng buộc phiên bản `pandas` — trong khi `pandas` 2.x đã đổi hành vi `to_datetime` và xử lý nullable dtype so với 1.x, đúng những chỗ mà QA-02/QA-04 đụng tới.
-
-**Đề xuất:** ghi tối thiểu `pandas`, `numpy`, `scikit-learn`, `streamlit`, `plotly`, `matplotlib`, `pytest`, kèm ràng buộc phiên bản tối thiểu.
-
----
-
-### 🟡 Mức NHẸ — cải thiện sau
-
----
-
-#### QA-06 — Lỗi thiếu cột bắt buộc trả về `KeyError` thô
-
-`clean_pipeline()` dừng đúng khi thiếu `InvoiceDate` (hành vi mong muốn), nhưng bằng `KeyError: 'InvoiceDate'` phát sinh từ tầng pandas, không phải lỗi nghiệp vụ có kiểm soát. Nếu Streamlit hiển thị thẳng, người dùng cuối sẽ thấy traceback.
-
-Repo cũng **chưa có `src/data/validation.py`** dù README có liệt kê. Đề xuất: bổ sung `validate_schema(df)` kiểm tra đủ 6 cột bắt buộc trước khi làm sạch, `raise ValueError("Thiếu cột bắt buộc: InvoiceDate")`.
-
----
-
-#### QA-10 — File `cleaned_transactions.csv` 60 MB bị commit vào Git
-
-`.gitignore` đã loại `data/raw/*.csv` nhưng `data/processed/cleaned_transactions.csv` (60,5 MB) vẫn nằm trong lịch sử nhánh `task2-data-cleaning`. Đây là dữ liệu **sinh lại được** bằng một lệnh. Mỗi lần chạy lại pipeline sẽ tạo một diff khổng lồ, làm review PR gần như không thể.
-
-**Đề xuất:** thêm `data/processed/` vào `.gitignore`. *(Chưa tự sửa vì file thuộc phạm vi Task 2.)*
-
----
-
-#### QA-11 — Hóa đơn tiền tố `A` chưa có quy tắc xử lý
-
-Dữ liệu gốc có 3 dòng `Invoice` bắt đầu bằng `A` (`A563185`, `A563186`, `A563187`), `StockCode = 'B'`, `Description = 'Adjust bad debt'`, giá trị ±11.062,06 — bút toán điều chỉnh kế toán, không phải giao dịch mua hàng.
-
-Hiện `IsCancelled` chỉ bắt tiền tố `C` nên 3 dòng này lọt qua như giao dịch thường. Hai dòng có giá âm nên vô tình bị `PriceAnomaly` bắt được, còn **1 dòng giá `+11.062,06` không bị gắn cờ nào**. Rất may cả 3 đều có `Customer ID` null nên sẽ bị loại khỏi RFM ở Epic 2 — nhưng đó là **may chứ không phải thiết kế**.
-
-**Đề xuất:** Leader bổ sung BR-09 cho tiền tố `A`, hoặc gộp `StockCode = 'B'` vào danh sách mã dịch vụ ở QA-01.
-
----
-
-#### QA-12 — Chất lượng mã nguồn của module làm sạch
-
-| Vấn đề | Vị trí |
-|---|---|
-| `pd.options.mode.chained_assignment = None` tắt cảnh báo toàn cục — che luôn các `SettingWithCopyWarning` thật ở module khác | `cleaning.py:2` |
-| `import logging` nhưng không dùng, toàn bộ output bằng `print()` — Streamlit không bắt được để hiển thị cho người dùng | `cleaning.py:3` |
-| `to_datetime` không truyền `format` → pandas cảnh báo và fallback về `dateutil`, chậm hơn nhiều trên 540k dòng | `cleaning.py:15` |
-
----
-
-## 6. Hạng mục CHƯA thực thi được
-
-### Bước 5 — Test UI upload & mapping (Task 3)
-
-**Trạng thái: ⛔ bị chặn.**
-
-Tính đến 27/07/2026, **Task 3 chưa có mã nguồn trên bất kỳ nhánh nào** của repo — `main`, `develop` và `task2-data-cleaning` đều không có thư mục `src/app/`. Không có UI để chạy, nên các hạng mục sau **chưa được kiểm chứng**:
-
-- C1 — mapping tự động khớp đúng 8 cột với file gốc
-- C2 — mapping thủ công với file đã đổi tên cột
-- **C3 — upload file có nhiều `Customer ID` null vẫn được chấp nhận** ⚠️
-- C4 — chặn upload khi thiếu cột bắt buộc, báo lỗi rõ ràng
-- C5 — thiếu cột tùy chọn vẫn cho đi tiếp
-- C6 — file sai kiểu dữ liệu không làm sập app
-
-**Đã chuẩn bị sẵn:** checklist Nhóm C trong `docs/qa_checklist_data.md` và các file test tương ứng (`test_missing_customerid.csv`, `test_missing_column.csv`, `test_wrong_dtype.csv`). QA chạy được ngay trong ngày Pipeline bàn giao.
-
-**Cảnh báo sớm gửi Pipeline (hạng mục C3).** Schema mục 2 ghi `Customer ID` là *"Có (đối với RFM)"*. Dòng chữ này rất dễ bị đọc thành ràng buộc `NOT NULL` ở bước validate upload. Đúng phải là: **cột `Customer ID` bắt buộc phải được *mapping*, nhưng giá trị bên trong được phép null.** Nếu Pipeline áp nhầm ràng buộc "không null", **25,16% dataset (135.037 dòng) sẽ bị chặn ngay từ cửa** — và vì lỗi nằm ở tầng validate, sẽ không có log nào của module làm sạch ghi nhận. Đây là lỗi tốn kém nhất trong Giai đoạn 1 nếu phát hiện muộn.
-
-### Nguồn số liệu đối chiếu ở Bước 6
-
-KAN-12 yêu cầu đối chiếu với *"số liệu Data đã báo cáo ở Bước 3 của Task 2"*. Trong repo **không có báo cáo văn bản nào của Task 2** (chỉ có `notebooks/eda_raw_data.ipynb` và file CSV đã xử lý). QA đã đối chiếu bằng nguồn thay thế mạnh hơn: **chạy lại pipeline và so từng chỉ số với file `cleaned_transactions.csv` mà Data đã commit** (mục 4). Kết quả khớp 100%.
-
-Đề nghị Data bổ sung báo cáo định lượng của Bước 3 Task 2 để QA đối chiếu con số **do Data tự công bố**, thay vì con số QA tự tính lại.
-
----
-
-## 7. Kiến nghị
-
-### Chặn cửa Giai đoạn 2 cho tới khi xong
-
-| # | Việc | Người chịu trách nhiệm |
-|---|---|---|
-| 1 | Fix QA-04 — khôi phục định dạng `Customer ID` | Data |
-| 2 | Fix QA-02 — ép kiểu `Quantity` / `Price` | Data |
-| 3 | Fix QA-03 — gắn cờ thay vì xoá dòng ngày lỗi | Data |
-| 4 | Chốt QA-07 — phạm vi dataset (1 năm hay 2 năm) | Leader + Data |
-| 5 | Chạy lại `pytest tests/` — 3 xfail tương ứng phải chuyển XPASS | Data → QA verify |
+## 8. Kiến nghị
+
+### Chặn cửa Giai đoạn 2
+
+| # | Việc | Vai trò | Phụ thuộc |
+|---|---|---|---|
+| 1 | Chạy lại `python src/data/cleaning.py`, commit file mới (QA-13) | Data | — |
+| 2 | Chạy lại notebook EDA, cập nhật mục 1/3.1/3.2/3.4/8 (QA-17) | Model | Sau việc 1 |
+| 3 | **Chốt bộ tên cột chuẩn cho toàn hệ thống** (QA-08) | Leader | — |
+| 4 | Sửa `STANDARD_COLUMNS` để hai luồng cùng schema (QA-16) | Pipeline | Sau việc 3 |
+| 5 | Chốt phạm vi dataset — 1 năm hay 2 năm (QA-07) | Leader + Data | — |
+| 6 | Chạy lại `pytest tests/`, QA xác nhận | QA/QC | Sau 1–5 |
+
+> **Việc 1 → 2 là chuỗi phụ thuộc.** Model không thể bắt đầu trước khi Data sinh lại file. Đề nghị Leader xếp thứ tự này khi giao việc.
 
 ### Song song, không chặn cửa
 
-| # | Việc | Người chịu trách nhiệm |
+| # | Việc | Vai trò |
 |---|---|---|
-| 6 | Fix QA-01 — bổ sung mã dịch vụ, so khớp không phân biệt hoa/thường | Data |
-| 7 | Chốt QA-05 — `TotalPrice` thuộc Epic 1 hay Epic 2 | Leader |
-| 8 | Fix QA-08 — thống nhất tên cột trong tài liệu | Leader |
-| 9 | Fix QA-09 — điền `requirements.txt` | Leader |
-| 10 | **Đọc cảnh báo C3 ở mục 6 trước khi code validate upload** | Pipeline |
+| 7 | Bổ sung `B` và tiền tố `gift_` vào `special_codes` (QA-01) | Data |
+| 8 | Thêm cờ `HasInvalidQuantity` (QA-14) | Data |
+| 9 | Thống nhất quyền sở hữu `src/data/cleaning.py` (QA-15) | Data + Pipeline |
+| 10 | Merge `develop` vào `task4-eda` (QA-18) | Model |
+| 11 | Bổ sung `pytest` + thư viện Epic 3 vào `requirements.txt` (QA-09) | Leader |
+| 12 | Thêm `data/processed/`, `outputs/results/` vào `.gitignore` (QA-10) | Data |
 
-### Quy trình
+### Quy trình — hai đề nghị cho Giai đoạn 2
 
-- Bộ test tại `tests/test_cleaning.py` dùng `@pytest.mark.xfail(strict=True)` cho từng lỗi đã ghi nhận. **Khi lỗi được sửa, pytest sẽ báo fail** (XPASS) để buộc gỡ marker — nhờ vậy không có test đỏ kinh niên, và không lỗi nào bị sửa âm thầm mà QA không biết.
-- Đề nghị thêm `pytest tests/` vào tiêu chí review PR của Giai đoạn 2.
+**1. Quy ước "sinh lại artifact".** QA-13 và QA-17 là cùng một gốc: không ai biết file trong `data/processed/` có còn khớp với code hay không. Đề nghị hoặc bỏ file này khỏi Git (sinh lại khi cần), hoặc bắt buộc ghi commit hash + thời điểm sinh vào `data/processed/README.md`. Notebook và script nên in nguồn dữ liệu ở cell đầu.
+
+**2. Thêm `pytest tests/` vào tiêu chí review PR.** Bộ test hiện có 43 test chạy trong ~1 giây, phủ cả module làm sạch lẫn UI mapping. Các lỗi đã ghi nhận dùng `xfail(strict=True)` nên bộ test luôn xanh khi chưa sửa, và **tự báo fail khi lỗi được sửa** để buộc gỡ marker — không lỗi nào bị sửa âm thầm mà QA không biết.
 
 ---
 
-## 8. Kết luận
+## 9. Kết luận
 
-Nguyên tắc **"gắn cờ, không xoá vội"** — trọng tâm cần bảo vệ của Giai đoạn 1 — **được tuân thủ đúng trên cả 4 trường hợp đặc thù của Online Retail II**. Không có dòng nào bị xoá nhầm vì `Customer ID` null, vì là hóa đơn hủy, vì là mã dịch vụ, hay vì giá bằng 0. Đây là kết quả tốt và là phần khó nhất của task.
+Nguyên tắc **"gắn cờ, không xoá vội"** tiếp tục được tuân thủ đúng, và 4 lỗi ép kiểu/định dạng nặng nhất của vòng 1 đã được Data xử lý gọn. Task 3 vượt qua toàn bộ checklist Nhóm C, kể cả cái bẫy `Customer ID` null. Task 4 cho ra một phân tích mà QA kiểm chứng được từng con số. Chất lượng công việc của từng vai trò là tốt.
 
-Các vấn đề còn lại tập trung ở **tầng ép kiểu và định dạng dữ liệu** (QA-02, QA-03, QA-04) — chưa gây thiệt hại trên dữ liệu gốc hiện tại, nhưng sẽ làm hỏng đầu vào của RFM ngay khi Epic 2 bắt đầu, và sẽ gây mất dữ liệu âm thầm khi người dùng thật upload file của họ. Cả ba đều fix được trong phạm vi hẹp.
+Vấn đề còn lại nằm ở **mối nối giữa các vai trò**: một artifact chưa được làm mới đã khiến cả một báo cáo EDA phải viết lại, và một dòng tài liệu chưa được chốt đã sinh ra hai schema song song trong cùng một hệ thống. Cả hai đều rẻ để sửa bây giờ và đắt nếu để sang Epic 2.
 
-**Khuyến nghị:** ⛔ **chưa đóng Giai đoạn 1.** Xử lý xong 5 hạng mục chặn cửa ở mục 7, QA chạy lại toàn bộ bộ test và cập nhật báo cáo này.
+**Khuyến nghị:** ⛔ **chưa đóng Giai đoạn 1.** Xử lý xong 6 việc chặn cửa ở mục 8 — trong đó việc 1 và 3 nên làm ngay vì các việc khác phụ thuộc vào chúng — sau đó QA chạy lại toàn bộ và cập nhật báo cáo này.
 
 ---
 
@@ -383,9 +272,13 @@ Các vấn đề còn lại tập trung ở **tầng ép kiểu và định dạ
 | Tài liệu | Đường dẫn |
 |---|---|
 | Checklist kiểm thử (Nhóm A/B/C/D) | [`docs/qa_checklist_data.md`](../../docs/qa_checklist_data.md) |
+| Review gửi Data (Task 2) | [`docs/reviews/qa_review_task2.md`](../../docs/reviews/qa_review_task2.md) |
+| Review gửi Pipeline (Task 3) | [`docs/reviews/qa_review_task3.md`](../../docs/reviews/qa_review_task3.md) |
+| Review gửi Model (Task 4) | [`docs/reviews/qa_review_task4.md`](../../docs/reviews/qa_review_task4.md) |
 | Bảng đối chiếu tự động | [`outputs/reports/qa_test_results.md`](qa_test_results.md) |
 | Bộ 7 file test lỗi cố ý + base sample | `data/test_samples/` |
 | Script sinh file test | `scripts/generate_test_samples.py` |
 | Script chạy kịch bản kiểm thử | `scripts/run_qa_scenarios.py` |
-| Bộ test tự động | `tests/test_cleaning.py` |
+| Bộ test module làm sạch | `tests/test_cleaning.py` |
+| Bộ test UI upload & mapping | `tests/test_upload_mapping.py` |
 | Đặc tả gốc (đáp án đối chiếu) | [`docs/T01_data_specification.md`](../../docs/T01_data_specification.md) |

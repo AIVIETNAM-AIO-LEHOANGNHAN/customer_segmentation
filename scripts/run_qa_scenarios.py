@@ -129,14 +129,23 @@ def check_wrong_dtype(out, exc):
     qty_numeric = pd.api.types.is_numeric_dtype(out["Quantity"])
     date_dt = pd.api.types.is_datetime64_any_dtype(out["InvoiceDate"])
     lost = 300 - len(out)
+    has_date_flag = "HasInvalidDate" in out.columns
+    qty_flags = [c for c in out.columns if "quantity" in c.lower() and out[c].dtype == bool]
+    qty_nan = int(out["Quantity"].isna().sum()) if qty_numeric else 0
     return [
         ("Không crash khi gặp sai kiểu dữ liệu", "không crash", "không crash", PASS),
         ("Quantity sau xử lý là kiểu số", "numeric", str(out["Quantity"].dtype),
          PASS if qty_numeric else FAIL),
         ("InvoiceDate sau xử lý là datetime", "datetime64", str(out["InvoiceDate"].dtype),
          PASS if date_dt else FAIL),
-        ("Dòng ngày sai được gắn cờ, không xoá âm thầm", "0 dòng bị xoá không cờ",
-         f"{lost} dòng bị xoá, không có cột cờ", PASS if lost == 0 else FAIL),
+        ("Dòng ngày sai được gắn cờ, không xoá âm thầm", "0 dòng bị xoá + có cờ",
+         f"{lost} dòng bị xoá, cờ HasInvalidDate: {'có' if has_date_flag else 'không'}",
+         PASS if lost == 0 and has_date_flag else FAIL),
+        ("Dòng Quantity ép kiểu hỏng được giữ lại", "0 dòng bị xoá",
+         f"{lost} dòng bị xoá, {qty_nan} dòng thành NaN", PASS if lost == 0 else FAIL),
+        ("Dòng Quantity ép kiểu hỏng được gắn cờ", "có cột cờ riêng",
+         f"{len(qty_flags)} cột cờ" + (f": {', '.join(qty_flags)}" if qty_flags else " (không có)"),
+         PASS if qty_flags else FAIL),
     ]
 
 
@@ -186,6 +195,64 @@ SCENARIOS = [
 ]
 
 
+def check_integration():
+    """Nhóm C/E — mối nối Task 3 (mapping) với Task 2 (làm sạch), và tính tươi
+    của artifact `data/processed/cleaned_transactions.csv`."""
+    rows = []
+    base_path = os.path.join(SAMPLE_DIR, "base_sample.csv")
+    if not os.path.exists(base_path):
+        return rows
+
+    try:
+        from src.app.column_mapper import apply_column_mapping, build_default_mapping
+    except ImportError:
+        rows.append(("—", "Task 3 — Upload/Mapping", "Module mapping tồn tại",
+                     "src/app/column_mapper.py", "chưa có trên nhánh này", FAIL))
+        return rows
+
+    from src.data.cleaning import clean_pipeline as _clean
+
+    df = pd.read_csv(base_path, encoding=ENCODING)
+    mapping = build_default_mapping(list(df.columns))
+    matched = sum(1 for v in mapping.values() if v)
+    rows.append(("base_sample.csv", "Task 3 — Mapping tự động", "Khớp đủ 8 cột chuẩn",
+                 "8/8 cột", f"{matched}/8 cột", PASS if matched == 8 else FAIL))
+
+    null_path = os.path.join(SAMPLE_DIR, "test_missing_customerid.csv")
+    if os.path.exists(null_path):
+        from src.app.column_mapper import validate_mapping
+        d = pd.read_csv(null_path, encoding=ENCODING)
+        res = validate_mapping(build_default_mapping(list(d.columns)), list(d.columns))
+        rows.append(("test_missing_customerid.csv", "BR-03 + Task 3",
+                     "CustomerID null KHÔNG chặn upload", "cho qua",
+                     "cho qua" if res.is_valid else f"bị chặn: {res.messages()}",
+                     PASS if res.is_valid else FAIL))
+
+    buf = StringIO()
+    with redirect_stdout(buf):
+        batch = _clean(df.copy())
+        via_ui = _clean(apply_column_mapping(df.copy(), mapping))
+    only_batch = sorted(set(batch.columns) - set(via_ui.columns))
+    only_ui = sorted(set(via_ui.columns) - set(batch.columns))
+    rows.append(("base_sample.csv", "Tích hợp Task 2 ↔ Task 3",
+                 "Luồng batch và luồng UI cho cùng schema", "cùng bộ tên cột",
+                 f"lệch {len(only_batch)} cột — batch: {', '.join(only_batch)} / UI: {', '.join(only_ui)}",
+                 PASS if not only_batch and not only_ui else FAIL))
+
+    processed = os.path.join("data", "processed", "cleaned_transactions.csv")
+    if os.path.exists(processed):
+        head = pd.read_csv(processed, nrows=200, low_memory=False)
+        fresh = "TotalPrice" in head.columns and "HasInvalidDate" in head.columns
+        rows.append((processed, "Tính tươi của artifact",
+                     "File processed sinh lại sau khi sửa module",
+                     "có TotalPrice + HasInvalidDate",
+                     f"{len(head.columns)} cột, TotalPrice: "
+                     f"{'có' if 'TotalPrice' in head.columns else 'thiếu'}, "
+                     f"HasInvalidDate: {'có' if 'HasInvalidDate' in head.columns else 'thiếu'}",
+                     PASS if fresh else FAIL))
+    return rows
+
+
 def main() -> int:
     rows = []
     for filename, rule, checker in SCENARIOS:
@@ -193,6 +260,7 @@ def main() -> int:
         out, _log, exc = run_pipeline(path)
         for criterion, expected, actual, verdict in checker(out, exc):
             rows.append((filename, rule, criterion, expected, actual, verdict))
+    rows.extend(check_integration())
 
     total = len(rows)
     failed = sum(1 for r in rows if r[5] == FAIL)
