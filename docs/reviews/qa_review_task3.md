@@ -185,6 +185,29 @@ if raw_df.empty:
 
 `st.caption` ở `Home.py` liệt kê cột bắt buộc/tùy chọn bằng chuỗi viết tay trong khi `REQUIRED_COLUMNS` và `OPTIONAL_COLUMNS` đã có sẵn. Nếu sửa T3-01 mà quên sửa chuỗi này, giao diện sẽ hướng dẫn tên cột cũ.
 
+### 🟠 T3-10 (Trung bình) — `use_container_width` đã hết hạn hỗ trợ
+
+*(Phát hiện khi QA chạy thật `Home.py`, không phải khi đọc code.)*
+
+`Home.py` gọi `st.dataframe(..., use_container_width=True)` ở 3 chỗ (dòng 78, 116, 120). Streamlit đã đánh dấu tham số này deprecated với **hạn gỡ bỏ 2025-12-31 — hạn này đã qua**. Mỗi lần render bảng, terminal in ra:
+
+```
+Please replace `use_container_width` with `width`.
+`use_container_width` will be removed after 2025-12-31.
+For `use_container_width=True`, use `width='stretch'`.
+```
+
+Trên `streamlit 1.58.0` tham số vẫn chạy. Rủi ro thật nằm ở chỗ `requirements.txt` ghi `streamlit` **không kèm phiên bản** — một thành viên cài mới hôm nay lấy bản mới nhất, nếu bản đó đã gỡ hẳn tham số thì app lỗi `TypeError` ngay khi render bảng, trong khi máy người khác vẫn chạy bình thường.
+
+```python
+st.dataframe(df, width="stretch")     # thay cho use_container_width=True
+```
+
+```
+# requirements.txt — ghim phiên bản cho cả nhóm dùng chung
+streamlit>=1.58,<2.0
+```
+
 ### Ghi chú thêm
 
 - **Đọc file hai lần vào RAM** — `read_uploaded_columns()` rồi `read_uploaded_dataframe()`. Với file 1 triệu dòng nên cân nhắc `st.cache_data`.
@@ -203,18 +226,38 @@ if raw_df.empty:
 | 5 | Phát hiện tên cột nhập nhằng sau chuẩn hoá | T3-04 | 🟠 Trung bình | Không |
 | 6 | Thống nhất với Data quyền sở hữu `cleaning.py` | QA-15 / T3-08 | 🟠 Trung bình | Không |
 | 7 | Chặn file 0 dòng | T3-07 | 🟡 Nhẹ | Không |
-| 8 | Dựng caption từ hằng số | T3-09 | 🟡 Nhẹ | Không |
-| 9 | Bổ sung `pytest` + thư viện Epic 3 vào `requirements.txt` | QA-09 | 🟡 Nhẹ | Không |
+| 8 | Đổi `use_container_width` → `width`, ghim phiên bản thư viện | T3-10 | 🟠 Trung bình | Không |
+| 9 | Dựng caption từ hằng số | T3-09 | 🟡 Nhẹ | Không |
+| 10 | Bổ sung `pytest` + thư viện Epic 3 vào `requirements.txt` | QA-09 | 🟡 Nhẹ | Không |
 
-Chạy lại kiểm thử Nhóm C bất cứ lúc nào:
+---
+
+## 6. Cách kiểm thử — và một điều QA cần nói rõ
+
+Vòng review đầu, QA **chỉ kiểm `column_mapper.py`**. Bộ test khi đó mô phỏng lại chuỗi lệnh mà `Home.py` chạy, chứ không chạy chính `Home.py`. Nghĩa là mọi thứ nằm riêng trong tầng giao diện — thứ tự gọi hàm, điều kiện bật/tắt nút, nhánh `try/except`, tham số truyền cho widget — đều **chưa được kiểm**.
+
+Đó là lý do T3-10 lọt lưới: nó chỉ lộ ra khi app chạy thật và render bảng.
+
+Vòng này QA đã bổ sung `tests/test_home_app.py`, chạy **chính `Home.py`** bằng `streamlit.testing.v1.AppTest`: nạp app, gán file vào ô upload, bấm nút, rồi đọc kết quả trên giao diện — đúng những gì người dùng thật làm, không cần mở trình duyệt.
 
 ```bash
-python -m pytest tests/test_upload_mapping.py -v
+python -m pytest tests/test_upload_mapping.py -v    # logic ánh xạ cột
 ```
 
-Hiện tại: **18 PASSED, 6 XFAIL**. `XFAIL` = lỗi đã ghi nhận, chưa sửa. Khi bạn sửa xong, test chuyển thành `XPASS` và pytest báo fail để nhắc gỡ marker `@pytest.mark.xfail` — rồi báo QA cập nhật báo cáo.
+```bash
+python -m pytest tests/test_home_app.py -v          # chạy thật giao diện
+```
 
-> 📄 **Bản đầy đủ dạng Word** (14 trang, có ảnh chụp lỗi, code tái hiện và code sửa cho từng lỗi): `BAO_CAO_LOI_TASK3_Upload_Mapping.docx` — QA gửi kèm trong Jira KAN-12.
+| Bộ test | Kết quả |
+|---|---|
+| `test_upload_mapping.py` | 18 PASSED / 6 XFAIL |
+| `test_home_app.py` | 13 PASSED / 2 XFAIL |
+
+Điều đáng mừng: **hạng mục C3 giờ đã được xác nhận trên chính giao diện**, không chỉ ở tầng hàm. Test `test_c3_file_with_null_customerid_completes_the_whole_flow` upload file có 75/300 dòng `Customer ID` trống, bấm nút, và app báo `Processed 300 rows` — không mất dòng nào, không bị chặn.
+
+`XFAIL` = lỗi đã ghi nhận, chưa sửa. Khi bạn sửa xong, test chuyển thành `XPASS` và pytest báo fail để nhắc gỡ marker `@pytest.mark.xfail` — rồi báo QA cập nhật báo cáo.
+
+> 📄 **Bản đầy đủ dạng Word** (15 trang, mỗi lỗi có code tái hiện và code sửa đề xuất): `BAO_CAO_LOI_TASK3_Upload_Mapping_v2.docx` — QA gửi kèm trong Jira KAN-12.
 
 ---
 
