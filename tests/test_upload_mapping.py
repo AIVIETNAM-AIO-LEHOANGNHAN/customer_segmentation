@@ -255,6 +255,97 @@ def test_c7_mapped_dataframe_is_accepted_by_clean_pipeline():
         assert col in cleaned.columns
 
 
+# ---------------------------------------------------------------------------
+# C8 — Lỗi biên phát hiện ở vòng soi sâu (29/07/2026)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="T3-02: apply_column_mapping chỉ gọi df.rename() mà không kiểm tra "
+           "tên đích có trùng cột sẵn có không. File vừa có 'UnitPrice' vừa có "
+           "'Price', người dùng map UnitPrice<-Price -> hai cột cùng tên "
+           "'UnitPrice' -> clean_pipeline vỡ với thông báo vô nghĩa.",
+)
+def test_c8_rename_must_not_create_duplicate_columns():
+    df = load_sample("base_sample.csv")
+    df["UnitPrice"] = df["Price"] * 1.2
+    mapping = build_default_mapping(list(df.columns))
+    mapping["UnitPrice"] = "Price"
+    assert validate_mapping(mapping, list(df.columns)).is_valid
+    mapped = apply_column_mapping(df, mapping)
+    cols = list(mapped.columns)
+    dup = sorted({c for c in cols if cols.count(c) > 1})
+    assert not dup, f"cột bị trùng sau khi rename: {dup}"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="T3-04: normalized_source là dict comprehension nên hai cột khác "
+           "nhau cùng chuẩn hoá về một key ('customer_id' và 'Customer-ID' "
+           "-> 'customerid') sẽ đè nhau, cột sau thắng, không cảnh báo.",
+)
+def test_c8_ambiguous_source_columns_are_reported():
+    df = load_sample("base_sample.csv").rename(columns={"Customer ID": "customer_id"})
+    df["Customer-ID"] = 999
+    mapping = build_default_mapping(list(df.columns))
+    result = validate_mapping(mapping, list(df.columns))
+    assert not result.is_valid, (
+        f"hai cột cùng chuẩn hoá về 'customerid' nhưng vẫn hợp lệ; "
+        f"đã chọn {mapping['CustomerID']!r}"
+    )
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="T3-03: _read_csv thử utf-8-sig -> utf-8 -> latin1. latin1 giải mã "
+           "được MỌI chuỗi byte nên không bao giờ raise; file UTF-16 bị đọc "
+           "thành cột rác 'ÿþI', 'Unnamed: 1'... mà không báo lỗi.",
+)
+def test_c8_undecodable_file_raises_instead_of_producing_garbage():
+    import io as _io
+
+    df = pd.DataFrame({
+        "Invoice": ["536365"], "StockCode": ["85123A"], "Description": ["Nến thơm"],
+        "Quantity": [6], "InvoiceDate": ["12/1/10 8:26"], "Price": [2.55],
+        "Customer ID": [17850], "Country": ["Việt Nam"],
+    })
+    buf = _io.BytesIO()
+    df.to_csv(buf, index=False, encoding="utf-16")
+    buf.seek(0)
+    columns = column_mapper.read_uploaded_columns(buf, "utf16.csv")
+    assert "Invoice" in columns, f"đọc sai mà không báo lỗi, cột nhận được: {columns[:3]}"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="T3-06: apply_column_mapping giữ lại cả cột không được map, nên "
+           "cột rác đi thẳng vào dữ liệu sạch. Cột trùng tên với cột phái "
+           "sinh (IsCancelled...) thì bị ghi đè âm thầm.",
+)
+def test_c8_unmapped_columns_are_dropped():
+    df = load_sample("base_sample.csv")
+    df["Ghi_chu_noi_bo"] = "rác"
+    mapping = build_default_mapping(list(df.columns))
+    mapped = apply_column_mapping(df, mapping)
+    assert "Ghi_chu_noi_bo" not in mapped.columns
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="T3-07: file chỉ có header (0 dòng dữ liệu) đi hết luồng và UI báo "
+           "'Processed 0 rows' như một lần chạy thành công.",
+)
+def test_c8_empty_file_is_rejected():
+    import io as _io
+
+    buf = _io.BytesIO(b"Invoice,StockCode,Quantity,InvoiceDate,Price,Customer ID\n")
+    df = column_mapper.read_uploaded_dataframe(buf, "empty.csv")
+    mapping = build_default_mapping(list(df.columns))
+    result = validate_mapping(mapping, list(df.columns))
+    assert not result.is_valid, "file 0 dòng vẫn được coi là hợp lệ"
+
+
 @pytest.mark.xfail(
     strict=True,
     reason="QA-16: luồng batch (python src/data/cleaning.py) xuất cột "

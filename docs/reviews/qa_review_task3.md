@@ -93,36 +93,128 @@ Về quy trình thì có rủi ro:
 
 ---
 
-## 4. 🟡 Ghi chú nhỏ — không chặn
+## 4. Lỗi biên phát hiện ở vòng soi sâu (29/07/2026)
 
-**N1. `Description` bị ép thành cột bắt buộc trên thực tế.**
-`REQUIRED_COLUMNS` khai báo đúng (`Description` là tùy chọn) và QA đã xác nhận C5 ĐẠT. Nhưng `caption` ở `Home.py` liệt kê required/optional bằng chuỗi viết tay, dễ lệch khỏi hằng số khi ai đó sửa. Nên dựng caption từ chính `REQUIRED_COLUMNS`/`OPTIONAL_COLUMNS`.
+Sau khi checklist Nhóm C đã qua hết, QA soi tiếp các tình huống dữ liệu bất thường mà người dùng thật dễ tạo ra. Tất cả đều đã được viết thành test và tái hiện được.
 
-**N2. Excel nhiều sheet gộp bằng `pd.concat` không kiểm cấu trúc.**
-Nếu hai sheet có tập cột khác nhau, `concat` sẽ tạo cột `NaN` lặng lẽ thay vì báo lỗi. Với Online Retail II (2 sheet cùng cấu trúc) thì không sao, nhưng nên cảnh báo khi tập cột giữa các sheet không khớp.
+### 🔴 T3-02 (Nghiêm trọng) — Đổi tên cột có thể tạo hai cột trùng tên, làm vỡ ứng dụng
 
-**N3. Thiếu giới hạn kích thước file.**
-File 1 triệu dòng đọc thẳng vào RAM hai lần (`read_uploaded_columns` rồi `read_uploaded_dataframe`). Nên cân nhắc `st.cache_data` hoặc cảnh báo khi file quá lớn.
+`apply_column_mapping()` chỉ gọi `df.rename()`, không kiểm tra tên đích có trùng cột đã có sẵn không. `validate_mapping()` cũng không bắt được.
 
-**N4. `requirements.txt`** — cảm ơn Pipeline đã thêm 3 dòng đầu tiên (lỗi QA-09 vòng 1 là file rỗng hoàn toàn). Vẫn còn thiếu `pytest` và các thư viện của Epic 3 (`scikit-learn`, `hdbscan`, `plotly`).
+Kịch bản rất dễ gặp — file của khách có cả `UnitPrice` (giá niêm yết) lẫn `Price` (giá thực trả):
+
+```python
+df["UnitPrice"] = df["Price"] * 1.2
+m = build_default_mapping(list(df.columns))   # tự động chọn UnitPrice
+m["UnitPrice"] = "Price"                      # người dùng sửa tay sang giá thực trả
+validate_mapping(m, list(df.columns)).is_valid   # -> True, KHÔNG cảnh báo
+list(apply_column_mapping(df, m).columns)
+# -> [..., 'UnitPrice', ..., 'UnitPrice']  HAI CỘT CÙNG TÊN
+```
+
+Từ đó `df["UnitPrice"]` trả về DataFrame chứ không phải Series, và người dùng nhận thông báo vô nghĩa:
+
+> `Cannot process file: arg must be a list, tuple, 1-d array, or Series`
+
+**Đề xuất:** chỉ giữ các cột được ánh xạ rồi kiểm tra trùng tên — xử lý luôn cả T3-06.
+
+```python
+result = df[list(rename_dict.keys())].rename(columns=rename_dict)
+duplicated = result.columns[result.columns.duplicated()].unique().tolist()
+if duplicated:
+    raise ValueError(f"Ánh xạ tạo ra cột trùng tên: {', '.join(duplicated)}.")
+```
+
+### 🟠 T3-03 (Trung bình) — Fallback `latin1` nuốt lỗi bảng mã
+
+`CSV_ENCODINGS` thử `utf-8-sig → utf-8 → latin1`. Vấn đề ở bước cuối: **`latin1` giải mã được mọi chuỗi byte nên không bao giờ raise**. File UTF-16 (Excel bản cũ, phần mềm kế toán hay xuất) được đọc thành cột rác mà không có lỗi nào:
+
+```
+read_uploaded_columns(buf, 'utf16.csv')
+-> ['ÿþI', 'Unnamed: 1', 'Unnamed: 2', ...]
+```
+
+Người dùng thấy danh sách cột toàn ký tự lạ, mọi ô mapping đều trống, không có gì giải thích.
+
+**Đề xuất:** thêm `utf-16` và `cp1258` vào danh sách thử trước `latin1`, và kiểm tra kết quả đọc có hợp lý không (tên cột phần lớn là chữ/số, không đầy `Unnamed:`) trước khi chấp nhận.
+
+### 🟠 T3-04 (Trung bình) — Hai cột chuẩn hoá trùng key, một cột bị bỏ âm thầm
+
+`normalized_source` là dict comprehension nên khi hai cột chuẩn hoá về cùng khoá, cột sau đè cột trước:
+
+```python
+df = df.rename(columns={"Customer ID": "customer_id"})
+df["Customer-ID"] = 999                      # cột rác thêm sau
+build_default_mapping(list(df.columns))["CustomerID"]
+# -> 'Customer-ID'   chọn nhầm cột rác, validate vẫn báo hợp lệ
+```
+
+Toàn bộ mã khách hàng bị lấy sai. Kết quả phân cụm vẫn ra một bảng đẹp nhưng gán sai khách — loại lỗi nguy hiểm nhất vì không có dấu hiệu phát hiện.
+
+**Đề xuất:** ghi nhận khoá nhập nhằng thay vì ghi đè, để trống ô mapping và yêu cầu người dùng chọn tay.
+
+### 🟠 T3-05 (Trung bình) — Excel gộp mọi sheet không kiểm cấu trúc
+
+Hai sheet lệch cột → `pd.concat` sinh cột mới và điền `NaN`, không cảnh báo. Sheet phụ không phải dữ liệu (`Ghi chú`, `Hướng dẫn`) cũng bị trộn vào dữ liệu giao dịch:
+
+```
+sheet 'Y2010' (có Country, Price) + sheet 'Y2011' (thiếu Country, tên cột UnitPrice)
+-> shape (10, 9), sinh thêm cột UnitPrice và 10 ô NaN, không cảnh báo
+
+file có sheet phụ 'Ghi chu'
+-> shape (6, 9), thêm 1 dòng rác + 1 cột rác vào dữ liệu giao dịch
+```
+
+**Đề xuất:** so tập cột giữa các sheet, lệch thì báo lỗi nêu rõ sheet nào; hoặc cho người dùng chọn sheet cần nạp.
+
+### 🟡 T3-06 (Nhẹ) — Cột không được ánh xạ vẫn lọt vào dữ liệu sạch
+
+`df.rename()` giữ nguyên mọi cột không map, nên cột rác đi thẳng ra file kết quả. Nguy hiểm hơn: cột trùng tên với cột phái sinh của Task 2 (`IsCancelled`, `TotalPrice`...) bị ghi đè âm thầm. Sửa T3-02 theo đề xuất trên là lỗi này tự hết.
+
+### 🟡 T3-07 (Nhẹ) — File chỉ có header vẫn báo thành công
+
+File CSV 0 dòng dữ liệu đi hết luồng, giao diện hiện `Processed 0 rows.` màu xanh như một lần chạy thành công. Nên chặn ngay sau `read_uploaded_dataframe()`:
+
+```python
+if raw_df.empty:
+    st.error("File không có dòng dữ liệu nào. Vui lòng kiểm tra lại.")
+    return
+```
+
+### 🟡 T3-09 (Nhẹ) — Caption viết tay dễ lệch khỏi hằng số
+
+`st.caption` ở `Home.py` liệt kê cột bắt buộc/tùy chọn bằng chuỗi viết tay trong khi `REQUIRED_COLUMNS` và `OPTIONAL_COLUMNS` đã có sẵn. Nếu sửa T3-01 mà quên sửa chuỗi này, giao diện sẽ hướng dẫn tên cột cũ.
+
+### Ghi chú thêm
+
+- **Đọc file hai lần vào RAM** — `read_uploaded_columns()` rồi `read_uploaded_dataframe()`. Với file 1 triệu dòng nên cân nhắc `st.cache_data`.
+- **`requirements.txt`** — cảm ơn Pipeline đã thêm 3 dòng đầu tiên (vòng 1 file rỗng hoàn toàn), và đã nhớ `openpyxl` cho phần đọc Excel. Còn thiếu `pytest` và thư viện Epic 3 (`scikit-learn`, `hdbscan`, `plotly`).
 
 ---
 
 ## 5. Việc cần làm
 
-| # | Việc | Mức | Chặn Giai đoạn 2? |
-|---|---|---|---|
-| 1 | **Chờ Leader chốt bộ tên cột chuẩn**, rồi sửa `STANDARD_COLUMNS` để hai luồng cùng schema (QA-16) | 🔴 Nghiêm trọng | **Có** |
-| 2 | Thống nhất với Data quyền sở hữu `src/data/cleaning.py` (QA-15) | 🟠 Trung bình | Không |
-| 3 | Dựng caption required/optional từ hằng số thay vì viết tay | 🟡 Nhẹ | Không |
-| 4 | Cảnh báo khi các sheet Excel lệch cấu trúc | 🟡 Nhẹ | Không |
-| 5 | Bổ sung `pytest` và thư viện Epic 3 vào `requirements.txt` | 🟡 Nhẹ | Không |
+| # | Việc | Lỗi | Mức | Chặn Giai đoạn 2? |
+|---|---|---|---|---|
+| 1 | **Chờ Leader chốt bộ tên cột chuẩn**, rồi sửa `STANDARD_COLUMNS` | QA-16 / T3-01 | 🔴 Nghiêm trọng | **Có** |
+| 2 | Chỉ giữ cột được ánh xạ + chặn trùng tên cột | T3-02, T3-06 | 🔴 Nghiêm trọng | **Có** |
+| 3 | Kiểm cấu trúc các sheet Excel trước khi gộp | T3-05 | 🟠 Trung bình | Không |
+| 4 | Bổ sung `utf-16`/`cp1258` + kiểm tra kết quả đọc | T3-03 | 🟠 Trung bình | Không |
+| 5 | Phát hiện tên cột nhập nhằng sau chuẩn hoá | T3-04 | 🟠 Trung bình | Không |
+| 6 | Thống nhất với Data quyền sở hữu `cleaning.py` | QA-15 / T3-08 | 🟠 Trung bình | Không |
+| 7 | Chặn file 0 dòng | T3-07 | 🟡 Nhẹ | Không |
+| 8 | Dựng caption từ hằng số | T3-09 | 🟡 Nhẹ | Không |
+| 9 | Bổ sung `pytest` + thư viện Epic 3 vào `requirements.txt` | QA-09 | 🟡 Nhẹ | Không |
 
 Chạy lại kiểm thử Nhóm C bất cứ lúc nào:
 
 ```bash
 python -m pytest tests/test_upload_mapping.py -v
 ```
+
+Hiện tại: **18 PASSED, 6 XFAIL**. `XFAIL` = lỗi đã ghi nhận, chưa sửa. Khi bạn sửa xong, test chuyển thành `XPASS` và pytest báo fail để nhắc gỡ marker `@pytest.mark.xfail` — rồi báo QA cập nhật báo cáo.
+
+> 📄 **Bản đầy đủ dạng Word** (14 trang, có ảnh chụp lỗi, code tái hiện và code sửa cho từng lỗi): `BAO_CAO_LOI_TASK3_Upload_Mapping.docx` — QA gửi kèm trong Jira KAN-12.
 
 ---
 
