@@ -29,40 +29,36 @@ def remove_buy_cancel_pairs(df):
     customer_col = _first_existing_column(df, CUSTOMER_COLUMNS)
     invoice_date_col = _first_existing_column(df, INVOICE_DATE_COLUMNS)
     
-    # Tập hợp index cần bị loại (cả dòng hủy và dòng mua gốc)
-    indices_to_drop = set()
-    
     # 1. Tìm các dòng hủy hợp lệ để xét
-    cancelled = df[(df['IsCancelled'] == True) & (df['HasCustomerID'] == True) & (df['Quantity'] < 0)]
+    cancelled = df[(df['IsCancelled'] == True) & (df['HasCustomerID'] == True) & (df['Quantity'] < 0)].copy()
+    cancelled['AbsQuantity'] = cancelled['Quantity'].abs()
     
-    # Đánh dấu xóa sẵn các dòng hủy
-    indices_to_drop.update(cancelled.index)
+    # 2. Tìm các dòng mua hợp lệ
+    valid_purchases = df[(df['IsCancelled'] == False) & (df['HasCustomerID'] == True) & (df['Quantity'] > 0)].copy()
     
-    # Tối ưu hóa việc tìm kiếm: Nhóm các giao dịch hợp lệ theo Customer và StockCode
-    valid_purchases = df[(df['IsCancelled'] == False) & (df['HasCustomerID'] == True) & (df['Quantity'] > 0)]
+    # Reset index để giữ lại index gốc nhằm xóa sau này
+    cancelled = cancelled.reset_index()
+    valid_purchases = valid_purchases.reset_index()
     
-    for idx, row in cancelled.iterrows():
-        customer = row[customer_col]
-        stock = row['StockCode']
-        qty = abs(row['Quantity'])
-        date = row[invoice_date_col]
-        
-        # Lọc nhanh
-        candidates = valid_purchases[
-            (valid_purchases[customer_col] == customer) &
-            (valid_purchases['StockCode'] == stock) &
-            (valid_purchases['Quantity'] == qty) &
-            (valid_purchases[invoice_date_col] <= date)
-        ]
-        
-        # Sắp xếp theo ngày giảm dần (tìm dòng gốc gần nhất)
-        candidates = candidates.sort_values(by=invoice_date_col, ascending=False)
-        
-        for cand_idx in candidates.index:
-            if cand_idx not in indices_to_drop:
-                indices_to_drop.add(cand_idx)
-                break
-                
+    # Merge based on Customer, StockCode, and Quantity
+    merged = pd.merge(
+        cancelled[['index', customer_col, 'StockCode', 'AbsQuantity', invoice_date_col]],
+        valid_purchases[['index', customer_col, 'StockCode', 'Quantity', invoice_date_col]],
+        left_on=[customer_col, 'StockCode', 'AbsQuantity'],
+        right_on=[customer_col, 'StockCode', 'Quantity'],
+        suffixes=('_cancel', '_buy')
+    )
+    
+    # Filter where buy date is <= cancel date
+    merged = merged[merged[f'{invoice_date_col}_buy'] <= merged[f'{invoice_date_col}_cancel']]
+    
+    # Sort and group to get the closest buy to the cancel date
+    merged = merged.sort_values(f'{invoice_date_col}_buy', ascending=False)
+    merged = merged.drop_duplicates(subset=['index_cancel'], keep='first')
+    
+    # Lấy các index cần xóa (cả hủy và mua)
+    indices_to_drop = set(cancelled['index']) | set(merged['index_buy'])
+    
     print(f"[remove_buy_cancel_pairs] Removed {len(indices_to_drop)} rows (buy-cancel pairs).")
     return df.drop(index=list(indices_to_drop))
 
