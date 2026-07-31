@@ -71,7 +71,7 @@ def flag_missing_customer(df):
     return df
 
 def flag_special_stockcode(df):
-    special_codes = ['POST', 'DOT', 'M', 'BANK CHARGES', 'C2', 'ADJUST', 'CRUK', 'D', 'S', 'AMAZONFEE']
+    special_codes = ['POST', 'DOT', 'M', 'BANK CHARGES', 'C2', 'ADJUST', 'CRUK', 'D', 'S', 'AMAZONFEE', 'B']
     stock_code_col = _first_existing_column(df, STOCK_CODE_COLUMNS)
     df['IsServiceCode'] = df[stock_code_col].astype(str).str.upper().isin(special_codes)
     print(f"[flag_special_stockcode] Flagged {df['IsServiceCode'].sum()} rows with special StockCodes.")
