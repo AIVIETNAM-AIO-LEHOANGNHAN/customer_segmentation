@@ -116,7 +116,6 @@ Trước tiên, ta tính:
 
 TotalPrice = Quantity × Price
 
-
 Sau đó, ta tính 
 
 Monetary = SUM(TotalPrice)
