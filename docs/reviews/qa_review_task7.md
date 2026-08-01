@@ -49,7 +49,7 @@ Module tính toán RFM hoạt động đúng theo đặc tả đã ban hành. D�
 
 | STT | Tiêu chí kiểm thử | Kết quả | Nhận xét |
 |-----|-------------------|----------|-----------|
-| 1 | Dữ liệu đầu vào đúng Data Schema | ✅ PASS | |
+| 1 | Dữ liệu đầu vào đúng Data Schema |  ❌ FAIL | Chưa xóa cột `HasInvalidDate`|
 | 2 | Đầy đủ các cột bắt buộc | ✅ PASS | |
 | 3 | Kiểu dữ liệu của các cột chính chính xác | ✅ PASS | |
 | 4 | Dữ liệu đã được xử lý theo Business Rules của Giai đoạn 1 | ✅ PASS | |
@@ -106,12 +106,11 @@ Module tính toán RFM hoạt động đúng theo đặc tả đã ban hành. D�
 
 # 4. Danh sách lỗi phát hiện
 
-**Không phát hiện lỗi.**
+**Lỗi phát hiện - Minor:** Cột `InvoceDate` hoàn toàn đúng kiểu dữ liệu nhưng bị gắn cờ
 
 ### Minh chứng
 
-- Toàn bộ testcase Pytest đều PASS. Chi tiết xin tái lập tại `tests/T10_1_test_task_7/`
-- Kết quả đối chiếu thủ công khớp với công thức RFM.
+![alt text](image.png)
 
 ---
 
@@ -132,11 +131,11 @@ Module tính toán RFM hoạt động đúng theo đặc tả đã ban hành. D�
 
 Module tính toán RFM đáp ứng đầy đủ các yêu cầu của tài liệu thiết kế. Kết quả kiểm thử cho thấy công thức tính toán chính xác, Business Rules được áp dụng đầy đủ và dữ liệu đầu ra đảm bảo chất lượng để phục vụ các bước chuẩn hóa và phân cụm khách hàng.
 
-Không phát hiện lỗi ở mức Critical, Major hoặc Minor trong quá trình kiểm thử.
+Không phát hiện lỗi ở mức Critical, Major trong quá trình kiểm thử.
 
 ---
 
-## 6.2. Kiến nghị
+## 6.2. Quyết định
 
 - ✅ Nghiệm thu Task 7.
 - ✅ Chuyển sang Task 8 – Chuẩn hóa dữ liệu RFM (Transformation & Scaling).

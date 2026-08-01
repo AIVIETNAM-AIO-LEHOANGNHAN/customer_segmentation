@@ -61,7 +61,7 @@ def test_price_anomaly_removed():
 # =====================================================
 def test_missing_customer_removed():
 
-    assert rfm["CustomerID"].isna().sum() == 0
+    assert rfm["Customer ID"].isna().sum() == 0
 
 
 # =====================================================
