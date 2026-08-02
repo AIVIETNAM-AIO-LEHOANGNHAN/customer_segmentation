@@ -79,6 +79,13 @@ def test_app_prompts_for_a_file_before_anything_else():
     assert not at.button, "chưa upload gì mà đã có nút xử lý"
 
 
+def test_rfm_dashboard_page_starts_without_error():
+    at = run_app()
+    at.radio[0].set_value("RFM Dashboard").run()
+    assert not at.exception, texts(at.exception)
+    assert at.title[0].value == "RFM Feature Dashboard"
+
+
 # ---------------------------------------------------------------------------
 # Luồng chính
 # ---------------------------------------------------------------------------
@@ -120,15 +127,9 @@ def test_full_flow_processes_the_file_and_reports_row_count():
 
 
 def test_previews_are_rendered_after_processing():
-    """Sau khi xử lý phải hiện 3 bảng: cột nguồn, dữ liệu đã map, dữ liệu đã sạch.
-
-    `AppTest` không bóc tách được `st.download_button` thành accessor riêng, nên
-    QA kiểm bằng các bảng preview — chúng nằm sau nút tải về trong `Home.py`,
-    có nghĩa là luồng đã chạy tới cuối.
-    """
+    """Sau khi xử lý phải hiện 3 bảng: cột nguồn, dữ liệu đã map, dữ liệu đã sạch."""
     at = click_process(run_app("base_sample.csv"))
     assert len(at.dataframe) == 3, f"phải có 3 bảng, đang có {len(at.dataframe)}"
-    assert any("Cleaning log" in e.label for e in at.expander), "thiếu mục Cleaning log"
 
 
 # ---------------------------------------------------------------------------

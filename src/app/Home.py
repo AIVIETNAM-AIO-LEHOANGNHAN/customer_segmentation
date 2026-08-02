@@ -25,6 +25,7 @@ from src.app.column_mapper import (  # noqa: E402
     validate_mapping,
 )
 from src.data.cleaning import clean_pipeline  # noqa: E402
+from src.visualization.rfm_dashboard import render_dashboard  # noqa: E402
 
 
 def main() -> None:
@@ -34,6 +35,18 @@ def main() -> None:
         layout="wide",
     )
 
+    page = st.sidebar.radio(
+        "Pipeline page",
+        ("Upload & Column Mapping", "RFM Dashboard"),
+    )
+    if page == "RFM Dashboard":
+        render_dashboard()
+        return
+
+    render_upload_mapping()
+
+
+def render_upload_mapping() -> None:
     st.title("Upload & Column Mapping")
     st.caption(
         "Accepted files: CSV or XLSX. Excel files with multiple sheets will be merged. "
@@ -99,8 +112,7 @@ def main() -> None:
         raw_df = read_uploaded_dataframe(uploaded_file, uploaded_file.name)
         mapped_df = apply_column_mapping(raw_df, mapping)
 
-        cleaning_log = io.StringIO()
-        with redirect_stdout(cleaning_log):
+        with redirect_stdout(io.StringIO()):
             cleaned_df = clean_pipeline(mapped_df.copy())
     except Exception as error:
         st.error(f"Cannot process file: {error}")
@@ -118,9 +130,6 @@ def main() -> None:
     with preview_right:
         st.subheader("Cleaned data preview")
         st.dataframe(cleaned_df.head(20), use_container_width=True)
-
-    with st.expander("Cleaning log"):
-        st.code(cleaning_log.getvalue() or "No cleaning log.", language="text")
 
     st.download_button(
         "Download cleaned CSV",
