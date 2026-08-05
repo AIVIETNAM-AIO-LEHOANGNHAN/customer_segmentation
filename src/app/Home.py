@@ -25,7 +25,15 @@ from src.app.column_mapper import (  # noqa: E402
     validate_mapping,
 )
 from src.data.cleaning import clean_pipeline  # noqa: E402
-from src.visualization.rfm_dashboard import render_dashboard  # noqa: E402
+from src.visualization.clustering_dashboard import (  # noqa: E402
+    render_dashboard as render_clustering_dashboard,
+)
+from src.visualization.evaluation_dashboard import (  # noqa: E402
+    render_dashboard as render_evaluation_dashboard,
+)
+from src.visualization.rfm_dashboard import (  # noqa: E402
+    render_dashboard as render_rfm_dashboard,
+)
 
 
 def main() -> None:
@@ -37,10 +45,21 @@ def main() -> None:
 
     page = st.sidebar.radio(
         "Pipeline page",
-        ("Upload & Column Mapping", "RFM Dashboard"),
+        (
+            "Upload & Column Mapping",
+            "RFM Dashboard",
+            "Clustering Results",
+            "Clustering Evaluation",
+        ),
     )
     if page == "RFM Dashboard":
-        render_dashboard()
+        render_rfm_dashboard()
+        return
+    if page == "Clustering Results":
+        render_clustering_dashboard()
+        return
+    if page == "Clustering Evaluation":
+        render_evaluation_dashboard()
         return
 
     render_upload_mapping()

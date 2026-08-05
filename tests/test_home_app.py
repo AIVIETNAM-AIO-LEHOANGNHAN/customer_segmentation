@@ -86,6 +86,20 @@ def test_rfm_dashboard_page_starts_without_error():
     assert at.title[0].value == "RFM Feature Dashboard"
 
 
+def test_clustering_results_page_starts_without_error():
+    at = run_app()
+    at.radio[0].set_value("Clustering Results").run()
+    assert not at.exception, texts(at.exception)
+    assert at.title[0].value == "Clustering Results Dashboard"
+
+
+def test_clustering_evaluation_page_starts_without_error():
+    at = run_app()
+    at.radio[0].set_value("Clustering Evaluation").run()
+    assert not at.exception, texts(at.exception)
+    assert at.title[0].value == "Clustering Evaluation Dashboard"
+
+
 # ---------------------------------------------------------------------------
 # Luồng chính
 # ---------------------------------------------------------------------------
