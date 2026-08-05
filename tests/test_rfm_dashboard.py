@@ -13,10 +13,12 @@ from src.visualization.rfm_dashboard import (  # noqa: E402
     LOG_LABEL,
     RAW_LABEL,
     SCALED_LABEL,
+    build_boxplot_summary,
     build_dataset_options,
     build_descriptive_stats,
     filter_by_customer_id,
     load_rfm_outputs,
+    make_boxplot,
     paginate_dataframe,
     sort_rfm_table,
 )
@@ -126,6 +128,22 @@ def test_table_search_sort_and_pagination_work_together():
     assert page.dataframe.iloc[0]["CustomerID"] == "12347.0"
 
 
+def test_sort_customer_id_uses_numeric_order_for_mixed_length_ids():
+    df = pd.DataFrame(
+        {
+            "CustomerID": ["9999", "12347", "12348", "555"],
+            "Recency": [1, 2, 3, 4],
+            "Frequency": [1, 2, 3, 4],
+            "Monetary": [10.0, 20.0, 30.0, 40.0],
+        }
+    )
+
+    sorted_df = sort_rfm_table(df, "CustomerID", ascending=True)
+
+    assert sorted_df["CustomerID"].tolist() == ["555", "9999", "12347", "12348"]
+    assert df["CustomerID"].tolist() == ["9999", "12347", "12348", "555"]
+
+
 def test_descriptive_stats_include_required_summary_rows():
     stats = build_descriptive_stats(raw_rfm())
 
@@ -134,3 +152,14 @@ def test_descriptive_stats_include_required_summary_rows():
     assert "Standard Deviation" in stats.index
     assert "Q1" in stats.index
     assert "Q3" in stats.index
+
+
+def test_boxplot_summary_and_chart_export_are_compact():
+    summary = build_boxplot_summary(raw_rfm())
+    spec = make_boxplot(raw_rfm()).to_dict()
+
+    assert summary["Feature"].tolist() == ["Recency", "Frequency", "Monetary"]
+    assert len(summary) == 3
+    assert "vconcat" in spec
+    assert len(spec["vconcat"]) == 3
+    assert spec["resolve"]["scale"]["x"] == "independent"

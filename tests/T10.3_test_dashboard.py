@@ -338,14 +338,6 @@ def test_group4_sort_and_filter_compose_correctly(raw):
     assert sorted_and_filtered["Monetary"].is_monotonic_decreasing
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="BUG-007: sort_rfm_table dùng df.sort_values(sort_column, ...) trực "
-           "tiếp. CustomerID được lưu dưới dạng CHUỖI (đúng T06), nên sắp xếp "
-           "theo CustomerID là sắp xếp TỪ ĐIỂN, không phải sắp xếp SỐ. Dữ liệu "
-           "hiện tại của Online Retail II toàn CustomerID 5 chữ số nên chưa lộ "
-           "ra, nhưng chỉ cần một khách hàng mã số khác độ dài là sai ngay.",
-)
 def test_group4_sort_by_customer_id_is_numeric_not_lexicographic():
     """Sắp xếp theo CustomerID phải theo giá trị SỐ, không theo ký tự."""
     mixed = pd.DataFrame({
@@ -462,15 +454,6 @@ def test_group5_large_dataset_loads_within_reasonable_time(tmp_path):
     assert elapsed < 5.0, f"quá chậm với dữ liệu lớn: {elapsed:.2f}s"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="BUG-008: make_boxplot() gọi df.melt() rồi vẽ 3 đặc trưng trên "
-           "boxplot; với 4.324 khách (12.972 dòng sau melt), Altair.to_dict() "
-           "vượt giới hạn mặc định 5.000 dòng và ném MaxRowsError. Streamlit tự "
-           "render qua Arrow nên UI thật KHÔNG vỡ, nhưng bất kỳ chỗ nào khác gọi "
-           "make_boxplot(df).to_dict()/.save() trực tiếp trên dữ liệu lớn (xuất "
-           "ảnh tĩnh, notebook, script) sẽ crash ngay lập tức.",
-)
 def test_group5_boxplot_spec_is_exportable_for_large_dataset(raw):
     """Chart phải xuất được ra dict/JSON ngay cả với dữ liệu đầy đủ 4.324 khách."""
     make_boxplot(raw).to_dict()

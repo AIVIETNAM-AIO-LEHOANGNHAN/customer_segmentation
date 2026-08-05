@@ -102,6 +102,24 @@ def filter_by_customer_id(df: pd.DataFrame, query: str) -> pd.DataFrame:
 def sort_rfm_table(df: pd.DataFrame, sort_column: str, ascending: bool) -> pd.DataFrame:
     if sort_column not in df.columns:
         return df
+    if sort_column == ID_COLUMN:
+        numeric_sort_column = "_customer_id_numeric_sort"
+        text_sort_column = "_customer_id_text_sort"
+        sortable = df.assign(
+            **{
+                numeric_sort_column: pd.to_numeric(df[ID_COLUMN], errors="coerce"),
+                text_sort_column: df[ID_COLUMN].astype(str),
+            }
+        )
+        return (
+            sortable.sort_values(
+                [numeric_sort_column, text_sort_column],
+                ascending=[ascending, ascending],
+                kind="mergesort",
+                na_position="last",
+            )
+            .drop(columns=[numeric_sort_column, text_sort_column])
+        )
     return df.sort_values(sort_column, ascending=ascending, kind="mergesort")
 
 
@@ -150,21 +168,59 @@ def make_histogram(df: pd.DataFrame, feature: str) -> alt.Chart:
     )
 
 
-def make_boxplot(df: pd.DataFrame) -> alt.Chart:
-    long_df = df[FEATURE_COLUMNS].melt(var_name="Feature", value_name="Value")
-    return (
-        alt.Chart(long_df)
-        .mark_boxplot(size=52, extent="min-max", color="#0f766e")
-        .encode(
-            x=alt.X("Feature:N", sort=FEATURE_COLUMNS, title=None),
-            y=alt.Y("Value:Q", title="Value"),
+def build_boxplot_summary(df: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for feature in FEATURE_COLUMNS:
+        values = pd.to_numeric(df[feature], errors="coerce").dropna()
+        quantiles = values.quantile([0.0, 0.25, 0.5, 0.75, 1.0])
+        rows.append(
+            {
+                "Feature": feature,
+                "Minimum": quantiles.loc[0.0],
+                "Q1": quantiles.loc[0.25],
+                "Median": quantiles.loc[0.5],
+                "Q3": quantiles.loc[0.75],
+                "Maximum": quantiles.loc[1.0],
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def make_boxplot(df: pd.DataFrame) -> alt.VConcatChart:
+    summary = build_boxplot_summary(df)
+    charts = []
+
+    for feature in FEATURE_COLUMNS:
+        feature_summary = summary[summary["Feature"] == feature]
+        base = alt.Chart(feature_summary).encode(
+            y=alt.Y(
+                "Feature:N",
+                title=None,
+                axis=alt.Axis(labels=False, ticks=False, domain=False),
+            ),
             tooltip=[
                 alt.Tooltip("Feature:N", title="Feature"),
-                alt.Tooltip("Value:Q", title="Value"),
+                alt.Tooltip("Minimum:Q", title="Minimum", format=",.2f"),
+                alt.Tooltip("Q1:Q", title="Q1", format=",.2f"),
+                alt.Tooltip("Median:Q", title="Median", format=",.2f"),
+                alt.Tooltip("Q3:Q", title="Q3", format=",.2f"),
+                alt.Tooltip("Maximum:Q", title="Maximum", format=",.2f"),
             ],
         )
-        .properties(height=360)
-    )
+        whisker = base.mark_rule(color="#64748b").encode(
+            x=alt.X("Minimum:Q", title="Value"),
+            x2=alt.X2("Maximum:Q"),
+        )
+        box = base.mark_bar(size=28, color="#0f766e", opacity=0.72).encode(
+            x=alt.X("Q1:Q", title="Value"),
+            x2=alt.X2("Q3:Q"),
+        )
+        median = base.mark_tick(color="#111827", size=34, thickness=2).encode(
+            x=alt.X("Median:Q", title="Value")
+        )
+        charts.append((whisker + box + median).properties(height=82, title=feature))
+
+    return alt.vconcat(*charts, spacing=12).resolve_scale(x="independent")
 
 
 def render_dashboard() -> None:
@@ -247,7 +303,7 @@ def _validate_rfm_frame(df: pd.DataFrame, path: Path) -> pd.DataFrame:
         )
 
     validated = df[REQUIRED_COLUMNS].copy()
-    validated[ID_COLUMN] = validated[ID_COLUMN].astype(str)
+    validated[ID_COLUMN] = validated[ID_COLUMN].astype(str).astype(object)
 
     non_numeric = []
     for column in FEATURE_COLUMNS:
