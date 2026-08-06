@@ -79,3 +79,51 @@ data/raw/*.csv
 # Environment variables
 # ==========================
 .env
+
+# ===========================
+# LaTeX build files
+# ===========================
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+*.xdv
+*.run.xml
+*.bcf
+*.idx
+*.ilg
+*.ind
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+
+# Temporary files
+*~
+*.bak
+*.tmp
+
+# ===========================
+# VSCode
+# ===========================
+.vscode/
+
+# ===========================
+# Python
+# ===========================
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
