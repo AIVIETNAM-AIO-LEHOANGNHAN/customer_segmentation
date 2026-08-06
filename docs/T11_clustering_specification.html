@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>t11_clustering_specification</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="T11_clustering_specification_files/libs/clipboard/clipboard.min.js"></script>
+<script src="T11_clustering_specification_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="T11_clustering_specification_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="T11_clustering_specification_files/libs/quarto-html/popper.min.js"></script>
+<script src="T11_clustering_specification_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="T11_clustering_specification_files/libs/quarto-html/anchor.min.js"></script>
+<link href="T11_clustering_specification_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="T11_clustering_specification_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="T11_clustering_specification_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="T11_clustering_specification_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="T11_clustering_specification_files/libs/bootstrap/bootstrap-efbb37e9afcc02144ebbc7afd12a776f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="task-11-tiêu-chí-đánh-giá-và-lựa-chọn-mô-hình-phân-cụm" class="level1">
+<h1>Task 11 : Tiêu chí đánh giá và lựa chọn mô hình phân cụm</h1>
+<section id="xác-định-các-thuật-toán-phân-cụm" class="level2">
+<h2 class="anchored" data-anchor-id="xác-định-các-thuật-toán-phân-cụm">1. Xác định các thuật toán phân cụm</h2>
+<section id="mục-tiêu" class="level3">
+<h3 class="anchored" data-anchor-id="mục-tiêu">1.1. Mục tiêu</h3>
+<p>Mục tiêu của bước này là thống nhất các thuật toán phân cụm sẽ được sử dụng trong dự án Customer Segmentation và xác định vai trò của từng thuật toán trong quá trình thực nghiệm. Việc lựa chọn trước các thuật toán giúp toàn bộ nhóm triển khai theo cùng một định hướng, đảm bảo các kết quả thu được có thể so sánh một cách công bằng và nhất quán.</p>
+<hr>
+</section>
+<section id="danh-sách-thuật-toán-sử-dụng" class="level3">
+<h3 class="anchored" data-anchor-id="danh-sách-thuật-toán-sử-dụng">1.2. Danh sách thuật toán sử dụng</h3>
+<p>Dự án sử dụng ba thuật toán phân cụm sau:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Thuật toán</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>K-Means</td>
+<td>Mô hình phân cụm cơ sở (Baseline Model)</td>
+</tr>
+<tr class="even">
+<td>Gaussian Mixture Model (GMM)</td>
+<td>Mô hình phân cụm xác suất</td>
+</tr>
+<tr class="odd">
+<td>HDBSCAN</td>
+<td>Mô hình phân cụm theo mật độ</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="mô-tả-từng-thuật-toán" class="level3">
+<h3 class="anchored" data-anchor-id="mô-tả-từng-thuật-toán">1.3. Mô tả từng thuật toán</h3>
+<section id="k-means" class="level4">
+<h4 class="anchored" data-anchor-id="k-means">1.3.1. K-Means</h4>
+<p>K-Means được lựa chọn làm mô hình cơ sở của dự án nhờ khả năng triển khai đơn giản, tốc độ huấn luyện nhanh và dễ diễn giải kết quả. Thuật toán hoạt động bằng cách chia dữ liệu thành <em>K</em> cụm sao cho tổng khoảng cách từ mỗi điểm dữ liệu đến tâm cụm là nhỏ nhất.</p>
+<p>Trong dự án này, K-Means đóng vai trò là mô hình tham chiếu để so sánh với các thuật toán còn lại. Đây cũng là thuật toán được sử dụng phổ biến trong các bài toán Customer Segmentation.</p>
+<section id="ưu-điểm" class="level5">
+<h5 class="anchored" data-anchor-id="ưu-điểm">Ưu điểm</h5>
+<ul>
+<li>Dễ cài đặt và triển khai.</li>
+<li>Thời gian huấn luyện nhanh.</li>
+<li>Kết quả dễ giải thích.</li>
+<li>Phù hợp với dữ liệu đã được chuẩn hóa.</li>
+</ul>
+</section>
+<section id="hạn-chế" class="level5">
+<h5 class="anchored" data-anchor-id="hạn-chế">Hạn chế</h5>
+<ul>
+<li>Phải xác định trước số cụm.</li>
+<li>Nhạy cảm với Outlier.</li>
+<li>Giả định các cụm có dạng hình cầu.</li>
+<li>Không xử lý tốt dữ liệu có mật độ phức tạp.</li>
+</ul>
+</section>
+<section id="trường-hợp-áp-dụng-phù-hợp" class="level5">
+<h5 class="anchored" data-anchor-id="trường-hợp-áp-dụng-phù-hợp">Trường hợp áp dụng phù hợp</h5>
+<p>K-Means phù hợp khi dữ liệu đã được chuẩn hóa và các cụm có hình dạng tương đối rõ ràng.</p>
+<hr>
+</section>
+</section>
+<section id="gaussian-mixture-model-gmm" class="level4">
+<h4 class="anchored" data-anchor-id="gaussian-mixture-model-gmm">1.3.2. Gaussian Mixture Model (GMM)</h4>
+<p>Gaussian Mixture Model là thuật toán phân cụm dựa trên mô hình xác suất. Thay vì gán cứng mỗi khách hàng vào một cụm, GMM ước lượng xác suất một khách hàng thuộc về từng cụm thông qua mô hình hỗn hợp Gaussian.</p>
+<p>Điều này giúp GMM mô hình hóa linh hoạt hơn các phân phối dữ liệu có hình dạng elip hoặc chồng lấn.</p>
+<section id="ưu-điểm-1" class="level5">
+<h5 class="anchored" data-anchor-id="ưu-điểm-1">Ưu điểm</h5>
+<ul>
+<li>Phân cụm mềm (Soft Clustering).</li>
+<li>Mô hình hóa được các cụm có hình dạng khác nhau.</li>
+<li>Linh hoạt hơn K-Means.</li>
+<li>Có thể biểu diễn mức độ chắc chắn của việc phân cụm.</li>
+</ul>
+</section>
+<section id="hạn-chế-1" class="level5">
+<h5 class="anchored" data-anchor-id="hạn-chế-1">Hạn chế</h5>
+<ul>
+<li>Thời gian huấn luyện dài hơn K-Means.</li>
+<li>Cần xác định trước số cụm.</li>
+<li>Có thể hội tụ vào nghiệm cục bộ.</li>
+<li>Nhạy cảm với khởi tạo ban đầu.</li>
+</ul>
+</section>
+<section id="trường-hợp-áp-dụng-phù-hợp-1" class="level5">
+<h5 class="anchored" data-anchor-id="trường-hợp-áp-dụng-phù-hợp-1">Trường hợp áp dụng phù hợp</h5>
+<p>GMM phù hợp khi dữ liệu có sự chồng lấn giữa các cụm hoặc không tuân theo dạng hình cầu.</p>
+<hr>
+</section>
+</section>
+<section id="hdbscan" class="level4">
+<h4 class="anchored" data-anchor-id="hdbscan">1.3.3. HDBSCAN</h4>
+<p>HDBSCAN là thuật toán phân cụm dựa trên mật độ. Khác với K-Means và GMM, HDBSCAN không yêu cầu xác định trước số lượng cụm mà tự động phát hiện các cụm dựa trên mật độ phân bố của dữ liệu.</p>
+<p>Thuật toán cũng có khả năng nhận diện các điểm nhiễu (Noise) và xử lý tốt các cụm có hình dạng phức tạp.</p>
+<section id="ưu-điểm-2" class="level5">
+<h5 class="anchored" data-anchor-id="ưu-điểm-2">Ưu điểm</h5>
+<ul>
+<li>Không cần xác định trước số cụm.</li>
+<li>Tự động phát hiện điểm nhiễu.</li>
+<li>Xử lý tốt các cụm có mật độ khác nhau.</li>
+<li>Ít bị ảnh hưởng bởi Outlier.</li>
+</ul>
+</section>
+<section id="hạn-chế-2" class="level5">
+<h5 class="anchored" data-anchor-id="hạn-chế-2">Hạn chế</h5>
+<ul>
+<li>Thời gian tính toán cao hơn.</li>
+<li>Có nhiều siêu tham số cần điều chỉnh.</li>
+<li>Khó diễn giải hơn K-Means.</li>
+<li>Kết quả phụ thuộc vào mật độ dữ liệu.</li>
+</ul>
+</section>
+<section id="trường-hợp-áp-dụng-phù-hợp-2" class="level5">
+<h5 class="anchored" data-anchor-id="trường-hợp-áp-dụng-phù-hợp-2">Trường hợp áp dụng phù hợp</h5>
+<p>HDBSCAN phù hợp khi dữ liệu có phân bố không đồng đều hoặc tồn tại nhiều điểm ngoại lệ.</p>
+<hr>
+</section>
+</section>
+</section>
+</section>
+<section id="xây-dựng-quy-trình-huấn-luyện-và-đánh-giá-mô-hình" class="level2">
+<h2 class="anchored" data-anchor-id="xây-dựng-quy-trình-huấn-luyện-và-đánh-giá-mô-hình">2. Xây dựng quy trình huấn luyện và đánh giá mô hình</h2>
+<section id="mục-tiêu-1" class="level3">
+<h3 class="anchored" data-anchor-id="mục-tiêu-1">2.1. Mục tiêu</h3>
+<p>Mục tiêu của bước này là xây dựng một quy trình huấn luyện và đánh giá thống nhất cho tất cả các thuật toán phân cụm trong dự án. Toàn bộ mô hình sẽ được triển khai trên cùng một bộ dữ liệu đầu vào, áp dụng cùng quy trình tiền xử lý và được đánh giá bằng cùng hệ thống chỉ số nhằm đảm bảo kết quả có thể so sánh trực tiếp.</p>
+<hr>
+</section>
+<section id="quy-trình-tổng-quát" class="level3">
+<h3 class="anchored" data-anchor-id="quy-trình-tổng-quát">2.2 Quy trình tổng quát</h3>
+<p>Toàn bộ quá trình huấn luyện và đánh giá được thực hiện theo quy trình sau:</p>
+<pre class="text"><code>RFM Scaled
+      │
+      ▼
+Huấn luyện mô hình
+      │
+      ▼
+Sinh nhãn Cluster
+      │
+      ▼
+Đánh giá chất lượng phân cụm
+      │
+      ▼
+So sánh giữa các thuật toán
+      │
+      ▼
+Lựa chọn mô hình tối ưu</code></pre>
+<hr>
+</section>
+<section id="mô-tả-từng-giai-đoạn" class="level3">
+<h3 class="anchored" data-anchor-id="mô-tả-từng-giai-đoạn">2.3. Mô tả từng giai đoạn</h3>
+<section id="giai-đoạn-1.-chuẩn-bị-dữ-liệu-đầu-vào" class="level4">
+<h4 class="anchored" data-anchor-id="giai-đoạn-1.-chuẩn-bị-dữ-liệu-đầu-vào">Giai đoạn 1. Chuẩn bị dữ liệu đầu vào</h4>
+<p>Tất cả các thuật toán đều sử dụng cùng một bộ dữ liệu đầu vào là <code>rfm_scaled.csv</code>, được tạo từ Epic 2 sau khi hoàn thành các bước tính toán RFM, biến đổi Logarithm và chuẩn hóa bằng StandardScaler.</p>
+<p>Việc sử dụng chung một bộ dữ liệu giúp đảm bảo các thuật toán được đánh giá trên cùng điều kiện.</p>
+<hr>
+</section>
+<section id="giai-đoạn-2.-huấn-luyện-mô-hình" class="level4">
+<h4 class="anchored" data-anchor-id="giai-đoạn-2.-huấn-luyện-mô-hình">Giai đoạn 2. Huấn luyện mô hình</h4>
+<p>Mỗi thuật toán sẽ được huấn luyện độc lập với bộ siêu tham số đã được quy định trong tài liệu đặc tả.</p>
+<p>Trong quá trình này, mô hình sẽ học cấu trúc dữ liệu và gán mỗi khách hàng vào một cụm tương ứng.</p>
+<hr>
+</section>
+<section id="giai-đoạn-3.-sinh-nhãn-phân-cụm" class="level4">
+<h4 class="anchored" data-anchor-id="giai-đoạn-3.-sinh-nhãn-phân-cụm">Giai đoạn 3. Sinh nhãn phân cụm</h4>
+<p>Sau khi huấn luyện, mô hình sẽ sinh ra nhãn (Cluster Label) cho từng khách hàng.</p>
+<p>Kết quả đầu ra bao gồm: <code>CustomerID</code> va <code>Cluster Label</code></p>
+<p>Đây là cơ sở để phân tích đặc điểm từng nhóm khách hàng ở các bước tiếp theo.</p>
+<hr>
+</section>
+<section id="giai-đoạn-4.-đánh-giá-chất-lượng-mô-hình" class="level4">
+<h4 class="anchored" data-anchor-id="giai-đoạn-4.-đánh-giá-chất-lượng-mô-hình">Giai đoạn 4. Đánh giá chất lượng mô hình</h4>
+<p>Các mô hình sau khi huấn luyện sẽ được đánh giá bằng cùng một bộ chỉ số nội tại (Internal Validation Metrics).</p>
+<p>Việc đánh giá tập trung vào:</p>
+<ul>
+<li>Mức độ tách biệt giữa các cụm.</li>
+<li>Mức độ đồng nhất trong từng cụm.</li>
+<li>Chất lượng tổng thể của kết quả phân cụm.</li>
+</ul>
+<p>Tất cả các thuật toán đều sử dụng cùng hệ thống chỉ số để đảm bảo khả năng so sánh.</p>
+<hr>
+</section>
+<section id="giai-đoạn-5.-so-sánh-các-mô-hình" class="level4">
+<h4 class="anchored" data-anchor-id="giai-đoạn-5.-so-sánh-các-mô-hình">Giai đoạn 5. So sánh các mô hình</h4>
+<p>Kết quả đánh giá của từng thuật toán sẽ được tổng hợp vào cùng một bảng so sánh.</p>
+<p>Các tiêu chí được sử dụng bao gồm:</p>
+<ul>
+<li>Chất lượng phân cụm.</li>
+<li>Độ ổn định của mô hình.</li>
+<li>Khả năng diễn giải kết quả.</li>
+<li>Ý nghĩa nghiệp vụ của các cụm khách hàng.</li>
+</ul>
+<hr>
+</section>
+<section id="giai-đoạn-6.-lựa-chọn-mô-hình-tối-ưu" class="level4">
+<h4 class="anchored" data-anchor-id="giai-đoạn-6.-lựa-chọn-mô-hình-tối-ưu">Giai đoạn 6. Lựa chọn mô hình tối ưu</h4>
+<p>Mô hình cuối cùng không được lựa chọn chỉ dựa trên một chỉ số duy nhất mà phải xem xét đồng thời nhiều tiêu chí đánh giá.</p>
+<p>Mô hình được chọn cần đáp ứng các yêu cầu:</p>
+<ul>
+<li>Chất lượng phân cụm tốt.</li>
+<li>Kết quả ổn định.</li>
+<li>Dễ giải thích.</li>
+<li>Phù hợp với mục tiêu Customer Segmentation của dự án.</li>
+</ul>
+<hr>
+</section>
+</section>
+</section>
+<section id="xác-định-phạm-vi-tìm-kiếm-siêu-tham-số-hyperparameter-search-space" class="level2">
+<h2 class="anchored" data-anchor-id="xác-định-phạm-vi-tìm-kiếm-siêu-tham-số-hyperparameter-search-space">3. Xác định phạm vi tìm kiếm siêu tham số (Hyperparameter Search Space)</h2>
+<section id="mục-tiêu-2" class="level3">
+<h3 class="anchored" data-anchor-id="mục-tiêu-2">3.1. Mục tiêu</h3>
+<p>Mục tiêu của bước này là xây dựng phạm vi tìm kiếm siêu tham số (Hyperparameter Search Space) cho từng thuật toán phân cụm nhằm đảm bảo quá trình huấn luyện được thực hiện một cách khách quan, nhất quán và có thể tái lập.</p>
+<p>Toàn bộ các mô hình trong dự án phải sử dụng đúng phạm vi tham số được quy định trong tài liệu này.</p>
+<hr>
+</section>
+<section id="nguyên-tắc-lựa-chọn-phạm-vi-tham-số" class="level3">
+<h3 class="anchored" data-anchor-id="nguyên-tắc-lựa-chọn-phạm-vi-tham-số">3.2. Nguyên tắc lựa chọn phạm vi tham số</h3>
+<p>Việc xây dựng không gian tìm kiếm tham số tuân theo các nguyên tắc sau:</p>
+<ul>
+<li>Phạm vi tham số phải đủ rộng để mô hình tìm được nghiệm tối ưu.</li>
+<li>Không sử dụng phạm vi quá lớn gây tăng thời gian huấn luyện không cần thiết.</li>
+<li>Các thuật toán phải được đánh giá trên cùng bộ dữ liệu đầu vào.</li>
+<li>Tất cả các lần huấn luyện phải sử dụng cùng <code>random_state</code> để đảm bảo khả năng tái lập kết quả.</li>
+</ul>
+<hr>
+</section>
+<section id="không-gian-tìm-kiếm-của-k-means" class="level3">
+<h3 class="anchored" data-anchor-id="không-gian-tìm-kiếm-của-k-means">3.3. Không gian tìm kiếm của K-Means</h3>
+<p>Các siêu tham số cần đánh giá gồm:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Tham số</th>
+<th>Giá trị đề xuất</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>n_clusters</td>
+<td>2 → 10</td>
+</tr>
+<tr class="even">
+<td>init</td>
+<td>k-means++</td>
+</tr>
+<tr class="odd">
+<td>n_init</td>
+<td>auto</td>
+</tr>
+<tr class="even">
+<td>max_iter</td>
+<td>300</td>
+</tr>
+<tr class="odd">
+<td>random_state</td>
+<td>42</td>
+</tr>
+</tbody>
+</table>
+<p>Trong đó, <code>n_clusters</code> là tham số quan trọng nhất và sẽ được thay đổi trong quá trình thực nghiệm nhằm tìm số lượng cụm phù hợp nhất.</p>
+<hr>
+</section>
+<section id="không-gian-tìm-kiếm-của-gaussian-mixture-model-gmm" class="level3">
+<h3 class="anchored" data-anchor-id="không-gian-tìm-kiếm-của-gaussian-mixture-model-gmm">3.4. Không gian tìm kiếm của Gaussian Mixture Model (GMM)</h3>
+<p>Các siêu tham số cần đánh giá gồm:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Tham số</th>
+<th>Giá trị đề xuất</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>n_components</td>
+<td>2 → 10</td>
+</tr>
+<tr class="even">
+<td>covariance_type</td>
+<td>full, tied, diag, spherical</td>
+</tr>
+<tr class="odd">
+<td>max_iter</td>
+<td>300</td>
+</tr>
+<tr class="even">
+<td>random_state</td>
+<td>42</td>
+</tr>
+</tbody>
+</table>
+<p>Việc đánh giá nhiều dạng ma trận hiệp phương sai (Covariance Type) giúp GMM có thể mô hình hóa các cụm với hình dạng và mức độ phân tán khác nhau.</p>
+<hr>
+</section>
+<section id="không-gian-tìm-kiếm-của-hdbscan" class="level3">
+<h3 class="anchored" data-anchor-id="không-gian-tìm-kiếm-của-hdbscan">3.5. Không gian tìm kiếm của HDBSCAN</h3>
+<p>Các siêu tham số cần đánh giá gồm:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Tham số</th>
+<th>Giá trị đề xuất</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>min_cluster_size</td>
+<td>5, 10, 20, 30, 50</td>
+</tr>
+<tr class="even">
+<td>min_samples</td>
+<td>None, 5, 10</td>
+</tr>
+<tr class="odd">
+<td>cluster_selection_method</td>
+<td>eom</td>
+</tr>
+<tr class="even">
+<td>metric</td>
+<td>euclidean</td>
+</tr>
+</tbody>
+</table>
+<p>Do HDBSCAN không yêu cầu xác định trước số cụm, việc điều chỉnh <code>min_cluster_size</code> và <code>min_samples</code> sẽ ảnh hưởng trực tiếp đến số lượng cụm được phát hiện và khả năng nhận diện các điểm nhiễu.</p>
+<hr>
+</section>
+<section id="quy-định-khi-thực-nghiệm" class="level3">
+<h3 class="anchored" data-anchor-id="quy-định-khi-thực-nghiệm">3.6. Quy định khi thực nghiệm</h3>
+<p>Để đảm bảo tính công bằng giữa các mô hình, toàn bộ quá trình thực nghiệm cần tuân thủ các quy định sau:</p>
+<ul>
+<li>Mỗi thuật toán được huấn luyện trên cùng bộ dữ liệu <code>rfm_scaled.csv</code>.</li>
+<li>Chỉ thay đổi các siêu tham số đã được quy định.</li>
+<li>Không thay đổi dữ liệu đầu vào trong quá trình tìm kiếm tham số.</li>
+<li>Kết quả của từng lần chạy phải được lưu lại để phục vụ so sánh và đánh giá.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="xây-dựng-bộ-chỉ-số-đánh-giá-mô-hình-phân-cụm" class="level2">
+<h2 class="anchored" data-anchor-id="xây-dựng-bộ-chỉ-số-đánh-giá-mô-hình-phân-cụm">4. Xây dựng bộ chỉ số đánh giá mô hình phân cụm</h2>
+<section id="mục-tiêu-3" class="level3">
+<h3 class="anchored" data-anchor-id="mục-tiêu-3">4.1. Mục tiêu</h3>
+<p>Mục tiêu của bước này là xây dựng bộ chỉ số đánh giá thống nhất nhằm đo lường chất lượng của các mô hình phân cụm. Do bài toán Customer Segmentation không có nhãn (Ground Truth), việc đánh giá sẽ dựa trên các chỉ số đánh giá nội tại (Internal Validation Metrics), phản ánh mức độ tách biệt giữa các cụm và sự tương đồng của các điểm dữ liệu trong cùng một cụm</p>
+<hr>
+</section>
+<section id="nguyên-tắc-đánh-giá" class="level3">
+<h3 class="anchored" data-anchor-id="nguyên-tắc-đánh-giá">4.2. Nguyên tắc đánh giá</h3>
+<p>Việc đánh giá mô hình tuân theo các nguyên tắc sau:</p>
+<ul>
+<li>Tất cả các thuật toán sử dụng cùng bộ dữ liệu đầu vào.</li>
+<li>Áp dụng cùng hệ thống chỉ số đánh giá.</li>
+<li>Không ưu tiên bất kỳ thuật toán nào trước khi có kết quả thực nghiệm.</li>
+<li>Việc lựa chọn mô hình phải dựa trên nhiều chỉ số thay vì một chỉ số duy nhất.</li>
+</ul>
+<hr>
+</section>
+<section id="bộ-chỉ-số-đánh-giá" class="level3">
+<h3 class="anchored" data-anchor-id="bộ-chỉ-số-đánh-giá">4.3. Bộ chỉ số đánh giá</h3>
+<p>Dự án sử dụng ba chỉ số đánh giá nội tại phổ biến trong bài toán phân cụm.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 27%">
+<col style="width: 48%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Chỉ số</th>
+<th>Ý nghĩa</th>
+<th>Giá trị mong muốn</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Silhouette Score</td>
+<td>Đánh giá mức độ tách biệt giữa các cụm</td>
+<td>Càng lớn càng tốt</td>
+</tr>
+<tr class="even">
+<td>Davies–Bouldin Index (DBI)</td>
+<td>Đánh giá mức độ chồng lấn giữa các cụm</td>
+<td>Càng nhỏ càng tốt</td>
+</tr>
+<tr class="odd">
+<td>Calinski–Harabasz Index (CHI)</td>
+<td>Đánh giá độ phân tách và độ cô đặc của cụm</td>
+<td>Càng lớn càng tốt</td>
+</tr>
+</tbody>
+</table>
+<p>Ba chỉ số này sẽ được tính cho tất cả các mô hình nhằm đảm bảo khả năng so sánh công bằng.</p>
+<hr>
+</section>
+<section id="ý-nghĩa-của-từng-chỉ-số" class="level3">
+<h3 class="anchored" data-anchor-id="ý-nghĩa-của-từng-chỉ-số">4.4 Ý nghĩa của từng chỉ số</h3>
+<section id="silhouette-score" class="level4">
+<h4 class="anchored" data-anchor-id="silhouette-score">4.1.1. Silhouette Score</h4>
+<p>Silhouette Score đo lường mức độ tương đồng của một điểm dữ liệu với các điểm trong cùng cụm so với các cụm khác.</p>
+<p>Giá trị của chỉ số nằm trong khoảng từ -1 đến 1.</p>
+<ul>
+<li>Giá trị gần 1 cho thấy các cụm được phân tách rõ ràng.</li>
+<li>Giá trị gần 0 cho thấy các cụm có sự chồng lấn.</li>
+<li>Giá trị âm cho thấy nhiều điểm dữ liệu có thể đã được gán sai cụm.</li>
+</ul>
+<p>Trong dự án, mô hình có Silhouette Score cao hơn sẽ được ưu tiên.</p>
+<hr>
+</section>
+<section id="daviesbouldin-index-dbi" class="level4">
+<h4 class="anchored" data-anchor-id="daviesbouldin-index-dbi">4.2.2. Davies–Bouldin Index (DBI)</h4>
+<p>Davies–Bouldin Index đánh giá mức độ tương đồng giữa các cụm dựa trên khoảng cách giữa tâm cụm và độ phân tán bên trong từng cụm.</p>
+<p>Giá trị càng nhỏ cho thấy các cụm càng tách biệt và đồng nhất.</p>
+<p>Mô hình có DBI thấp hơn được xem là có chất lượng phân cụm tốt hơn.</p>
+<hr>
+</section>
+<section id="calinskiharabasz-index-chi" class="level4">
+<h4 class="anchored" data-anchor-id="calinskiharabasz-index-chi">4.3.3. Calinski–Harabasz Index (CHI)</h4>
+<p>Calinski–Harabasz Index đánh giá tỷ lệ giữa độ phân tán giữa các cụm và độ phân tán trong từng cụm.</p>
+<p>Giá trị càng lớn chứng tỏ các cụm càng rõ ràng và dữ liệu trong cùng cụm càng đồng nhất.</p>
+<p>Đây là chỉ số thường được sử dụng để đánh giá chất lượng tổng thể của mô hình phân cụm.</p>
+<hr>
+</section>
+</section>
+</section>
+<section id="thiết-kế-quy-trình-lựa-chọn-mô-hình-tối-ưu" class="level2">
+<h2 class="anchored" data-anchor-id="thiết-kế-quy-trình-lựa-chọn-mô-hình-tối-ưu">5. Thiết kế quy trình lựa chọn mô hình tối ưu</h2>
+<section id="mục-tiêu-4" class="level3">
+<h3 class="anchored" data-anchor-id="mục-tiêu-4">5.1. Mục tiêu</h3>
+<p>Mục tiêu của bước này là xây dựng quy trình lựa chọn mô hình phân cụm tối ưu sau khi hoàn thành quá trình huấn luyện và đánh giá. Thay vì lựa chọn mô hình dựa trên một chỉ số duy nhất, dự án áp dụng phương pháp đánh giá tổng hợp nhằm xem xét đồng thời chất lượng phân cụm, tính ổn định của mô hình và khả năng diễn giải kết quả.</p>
+<p>Quy trình này giúp đảm bảo mô hình cuối cùng không chỉ đạt hiệu quả về mặt kỹ thuật mà còn tạo ra các cụm khách hàng có ý nghĩa đối với bài toán Customer Segmentation.</p>
+<hr>
+</section>
+<section id="nguyên-tắc-lựa-chọn" class="level3">
+<h3 class="anchored" data-anchor-id="nguyên-tắc-lựa-chọn">5.2. Nguyên tắc lựa chọn</h3>
+<p>Việc lựa chọn mô hình phải tuân thủ các nguyên tắc sau:</p>
+<ul>
+<li>Không lựa chọn mô hình dựa trên một chỉ số duy nhất.</li>
+<li>So sánh tất cả các mô hình trên cùng bộ dữ liệu đầu vào.</li>
+<li>Kết quả phải có khả năng tái lập.</li>
+<li>Các cụm tạo ra phải có ý nghĩa nghiệp vụ.</li>
+<li>Mô hình được chọn phải phù hợp với mục tiêu phân khúc khách hàng của dự án.</li>
+</ul>
+<hr>
+</section>
+<section id="tiêu-chí-đánh-giá" class="level3">
+<h3 class="anchored" data-anchor-id="tiêu-chí-đánh-giá">5.3. Tiêu chí đánh giá</h3>
+<p>Mỗi mô hình sẽ được đánh giá theo các nhóm tiêu chí sau.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 44%">
+<col style="width: 55%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Nhóm tiêu chí</th>
+<th>Nội dung đánh giá</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Chất lượng phân cụm</td>
+<td>Silhouette Score, Davies–Bouldin Index, Calinski–Harabasz Index</td>
+</tr>
+<tr class="even">
+<td>Độ ổn định</td>
+<td>Kết quả giữa nhiều lần chạy có nhất quán hay không</td>
+</tr>
+<tr class="odd">
+<td>Khả năng diễn giải</td>
+<td>Các cụm có dễ phân tích và mô tả đặc điểm hay không</td>
+</tr>
+<tr class="even">
+<td>Ý nghĩa nghiệp vụ</td>
+<td>Các cụm có phản ánh đúng hành vi khách hàng hay không</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="quy-trình-lựa-chọn" class="level3">
+<h3 class="anchored" data-anchor-id="quy-trình-lựa-chọn">5.4. Quy trình lựa chọn</h3>
+<p>Việc lựa chọn mô hình được thực hiện theo trình tự sau:</p>
+<ul>
+<li>Tổng hợp toàn bộ kết quả đánh giá của các thuật toán vào cùng một bảng.</li>
+<li>So sánh các chỉ số đánh giá nội tại giữa các mô hình.</li>
+<li>Đánh giá độ ổn định của mô hình bằng cách chạy nhiều lần với cùng dữ liệu đầu vào.</li>
+<li>Phân tích đặc điểm của từng cụm khách hàng thông qua các đặc trưng RFM.</li>
+<li>Đánh giá ý nghĩa nghiệp vụ của từng cụm và khả năng hỗ trợ ra quyết định trong bài toán Customer Segmentation.</li>
+<li>Lựa chọn mô hình có chất lượng tổng thể tốt nhất để sử dụng trong các bước phân tích và trực quan hóa tiếp theo/</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="định-nghĩa-sản-phẩm-đầu-ra-của-mô-hình-phân-cụm" class="level2">
+<h2 class="anchored" data-anchor-id="định-nghĩa-sản-phẩm-đầu-ra-của-mô-hình-phân-cụm">6. Định nghĩa sản phẩm đầu ra của mô hình phân cụm</h2>
+<section id="mục-tiêu-5" class="level3">
+<h3 class="anchored" data-anchor-id="mục-tiêu-5">6.1. Mục tiêu</h3>
+<p>Mục tiêu của bước này là thống nhất các sản phẩm đầu ra sau khi hoàn thành quá trình huấn luyện và lựa chọn mô hình phân cụm. Việc chuẩn hóa đầu ra giúp các thành viên trong nhóm sử dụng chung một định dạng dữ liệu, đồng thời tạo điều kiện thuận lợi cho các bước trực quan hóa, phân tích đặc điểm cụm và xây dựng ứng dụng.</p>
+<hr>
+</section>
+<section id="nguyên-tắc-xây-dựng-đầu-ra" class="level3">
+<h3 class="anchored" data-anchor-id="nguyên-tắc-xây-dựng-đầu-ra">6.2. Nguyên tắc xây dựng đầu ra</h3>
+<p>Sản phẩm đầu ra phải đáp ứng các yêu cầu sau:</p>
+<ul>
+<li>Có thể tái sử dụng trong các giai đoạn tiếp theo.</li>
+<li>Định dạng thống nhất giữa các thuật toán.</li>
+<li>Dễ kiểm tra và dễ trực quan hóa.</li>
+<li>Hỗ trợ đầy đủ cho việc phân tích cụm khách hàng.</li>
+</ul>
+<hr>
+</section>
+<section id="danh-sách-sản-phẩm-đầu-ra" class="level3">
+<h3 class="anchored" data-anchor-id="danh-sách-sản-phẩm-đầu-ra">6.3. Danh sách sản phẩm đầu ra</h3>
+<p>Sau khi hoàn thành quá trình phân cụm, hệ thống cần tạo các sản phẩm sau.</p>
+<section id="bảng-kết-quả-phân-cụm" class="level4">
+<h4 class="anchored" data-anchor-id="bảng-kết-quả-phân-cụm">Bảng kết quả phân cụm</h4>
+<p>Lưu thông tin khách hàng cùng nhãn cụm.</p>
+<p>Ví dụ:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>CustomerID</th>
+<th>Cluster</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>12346</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>12347</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>12348</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>Đường dẫn lưu: <code>data/processed/customer_clusters.csv</code></p>
+<hr>
+</section>
+<section id="bảng-đặc-trưng-rfm-kèm-nhãn-cụm" class="level4">
+<h4 class="anchored" data-anchor-id="bảng-đặc-trưng-rfm-kèm-nhãn-cụm">Bảng đặc trưng RFM kèm nhãn cụm</h4>
+<p>Ghép bộ đặc trưng RFM với kết quả phân cụm để phục vụ phân tích.</p>
+<p>Ví dụ:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>CustomerID</th>
+<th>Recency</th>
+<th>Frequency</th>
+<th>Monetary</th>
+<th>Cluster</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>12346</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>Đường dẫn lưu : <code>data/processed/rfm_clustered.csv</code></p>
+<hr>
+</section>
+<section id="báo-cáo-đánh-giá-mô-hình" class="level4">
+<h4 class="anchored" data-anchor-id="báo-cáo-đánh-giá-mô-hình">Báo cáo đánh giá mô hình</h4>
+<p>Tổng hợp kết quả đánh giá của các thuật toán.</p>
+<p>Nội dung gồm:</p>
+<ul>
+<li>Thuật toán.</li>
+<li>Số cụm.</li>
+<li>Bộ tham số.</li>
+<li>Silhouette Score.</li>
+<li>Davies–Bouldin Index.</li>
+<li>Calinski–Harabasz Index.</li>
+<li>Nhận xét.</li>
+</ul>
+<p>Đường dẫn lưu: <code>outputs/reports/clustering_evaluation.md</code></p>
+<hr>
+</section>
+<section id="hình-ảnh-trực-quan" class="level4">
+<h4 class="anchored" data-anchor-id="hình-ảnh-trực-quan">Hình ảnh trực quan</h4>
+<p>Các biểu đồ phục vụ đánh giá mô hình và phân tích cụm.</p>
+<p>Bao gồm:</p>
+<ul>
+<li>PCA Scatter Plot.</li>
+<li>Cluster Distribution.</li>
+<li>Elbow Curve (nếu có).</li>
+<li>Silhouette Plot (nếu có).</li>
+</ul>
+<p>Đường dẫn lưu: <code>outputs/figures/</code></p>
+<hr>
+</section>
+<section id="mô-hình-đã-huấn-luyện" class="level4">
+<h4 class="anchored" data-anchor-id="mô-hình-đã-huấn-luyện">Mô hình đã huấn luyện</h4>
+<p>Lưu mô hình để phục vụ triển khai và tái sử dụng.</p>
+<p>Đường dẫn: <code>models/</code></p>
+<hr>
+</section>
+</section>
+<section id="cấu-trúc-thư-mục-đầu-ra" class="level3">
+<h3 class="anchored" data-anchor-id="cấu-trúc-thư-mục-đầu-ra">6.4. Cấu trúc thư mục đầu ra</h3>
+<pre class="text"><code>data/
+└── processed/
+    ├── customer_clusters.csv
+    └── rfm_clustered.csv
+
+outputs/
+├── reports/
+│   └── clustering_evaluation.md
+└── figures/
+    ├── cluster_distribution.png
+    ├── pca_clusters.png
+    ├── elbow_curve.png
+    └── silhouette_plot.png
+
+models/
+└── best_model.pkl</code></pre>
+<hr>
+</section>
+</section>
+<section id="kết-luận" class="level2">
+<h2 class="anchored" data-anchor-id="kết-luận">7. Kết luận</h2>
+<p>Sau giai đoạn này, toàn bộ kết quả của quá trình phân cụm được chuẩn hóa thành các sản phẩm đầu ra thống nhất, bao gồm dữ liệu, báo cáo, biểu đồ và mô hình đã huấn luyện. Đây sẽ là đầu vào trực tiếp cho giai đoạn phân tích đặc điểm cụm khách hàng, trực quan hóa kết quả và xây dựng ứng dụng Streamlit của dự án.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
